@@ -12,7 +12,6 @@ public class LinkMan {
 	
 	private String name;
 	private String mobilePhone;
-	private String honeTelephone;
 	private String address;
 	private String email;
 	private int ground;
@@ -43,12 +42,6 @@ public class LinkMan {
 	}
 	public void setMobilePhone(String mobilePhone) {
 		this.mobilePhone = mobilePhone;
-	}
-	public String getHoneTelephone() {
-		return honeTelephone;
-	}
-	public void setHoneTelephone(String honeTelephone) {
-		this.honeTelephone = honeTelephone;
 	}
 	public String getAddress() {
 		return address;

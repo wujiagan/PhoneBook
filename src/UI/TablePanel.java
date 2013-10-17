@@ -3,6 +3,7 @@ package UI;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -18,15 +19,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JTree;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 
 import table.WDefaultTableModel;
 import user.LinkMan;
@@ -51,6 +49,10 @@ public class TablePanel extends JPanel {
 	private int select, selectRow;
 	
 	private ProfilePanel profilePanel = null;
+	private LinkManAddPanel linkManAddPanel = null;
+	private TreePanel treePanel = null ;
+	
+	private Font font = new Font("宋体", 0, 15);
 	
 	private ImageIcon[] photo = {
 			new ImageIcon(getClass().getResource("/UI/image/user.png")),
@@ -67,8 +69,9 @@ public class TablePanel extends JPanel {
 	
 	
 	public TablePanel(){
-		this.setLayout(new BorderLayout());
+		this.setLayout(null);
 		profilePanel = new ProfilePanel(this);
+		linkManAddPanel = new LinkManAddPanel(this);
 		JPanel tablePanel = new JPanel(new BorderLayout());
 		JPanel findPanel = new JPanel();
 		Object[] columnDatas = { "群组", "姓名", "手机", "邮箱", "地址", "选择"};
@@ -80,6 +83,7 @@ public class TablePanel extends JPanel {
 		tableModel = new WDefaultTableModel(null,columnNames);
 		table = new JTable(tableModel);
 		table.setRowHeight(35);
+		table.setFont(font);
 		table.setShowGrid(false);
 		table.setForeground(Color.blue);
 		table.setSelectionBackground(Color.yellow);
@@ -167,19 +171,17 @@ public class TablePanel extends JPanel {
 		
 		tableView.add(tablePanel,"tablePanel");
 		tableView.add(profilePanel,"profile");
+		tableView.add(linkManAddPanel,"linkManAddPanel");
 		
-		this.add(tableView, BorderLayout.CENTER);
+		int height = this.getHeight();
+		int width = this.getWidth();
 		
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("华南农业大学         ");
-		DefaultMutableTreeNode major1 = new DefaultMutableTreeNode("软件学院");
-		DefaultMutableTreeNode major2 = new DefaultMutableTreeNode("艺术学院");
-		major1.add(new DefaultMutableTreeNode("软工R3班"));
-		major1.add(new DefaultMutableTreeNode("软工R4班"));
-		root.add(major1);
-		root.add(major2);
-		JTree jtree = new JTree(new DefaultTreeModel(root));
-		JScrollPane jtreePanel = new JScrollPane(jtree);
-		this.add(jtreePanel,BorderLayout.WEST);
+		tableView.setBounds(200, 0,654, 505);
+		this.add(tableView);
+		
+		treePanel = new TreePanel(this);
+		treePanel.setBounds(0, 0, 200, 505);
+		this.add(treePanel);
 	}
 	
 	/**
@@ -189,7 +191,14 @@ public class TablePanel extends JPanel {
 	public int getSelectRow(){
 		return selectRow;
 	}
-
+	
+	/**
+	 * 显示添加新联系人对话框
+	 */
+	public void showLinkManAddPanel(String dirName, String fileName) {
+		cardLayout.show(tableView, "linkManAddPanel");
+		linkManAddPanel.setOperateFile(dirName, fileName);
+	}
 	
 	/** 
 	 * 保存table数据
