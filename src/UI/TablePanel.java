@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -28,11 +29,17 @@ import javax.swing.table.TableColumn;
 
 import table.WDefaultTableModel;
 import user.LinkMan;
+import util.Configuration;
 import util.DataOperate;
 import util.FileProxy;
+import util.XMLFileProxy;
 
 
 public class TablePanel extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private DefaultTableModel tableModel;
 	private JTable table;
 	
@@ -67,6 +74,11 @@ public class TablePanel extends JPanel {
 	 */
 	private List<LinkMan> linkMans = new LinkedList<LinkMan>();
 	
+	/** 
+	 * 保存当前table数据所对应的文件
+	 */
+	private String currenFilePath = null;
+	
 	
 	public TablePanel(){
 		this.setLayout(null);
@@ -97,9 +109,7 @@ public class TablePanel extends JPanel {
 		
 		find.addActionListener(new ActionListener(){
 			@SuppressWarnings("unchecked")
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
 				if(!isFound){
 					results = DataOperate.find(tableModel.getDataVector(), factor.getText()) ;
 					if(results != null || results.length !=0){
@@ -173,9 +183,6 @@ public class TablePanel extends JPanel {
 		tableView.add(profilePanel,"profile");
 		tableView.add(linkManAddPanel,"linkManAddPanel");
 		
-		int height = this.getHeight();
-		int width = this.getWidth();
-		
 		tableView.setBounds(200, 0,654, 505);
 		this.add(tableView);
 		
@@ -203,9 +210,8 @@ public class TablePanel extends JPanel {
 	/** 
 	 * 保存table数据
 	 */
-	@SuppressWarnings("unchecked")
 	public void saveFile() {
-		FileProxy.saveFile(tableModel.getDataVector());
+		XMLFileProxy.saveToFile(linkMans, currenFilePath);
 	}
 	
 	/** 
@@ -285,6 +291,7 @@ public class TablePanel extends JPanel {
 		}
 		
 	}
+	
 	/**
 	 * 更新第select行的数据
 	 * @param select
@@ -311,5 +318,17 @@ public class TablePanel extends JPanel {
 		lastColumn.setPreferredWidth(40);
 		lastColumn.setMaxWidth(40);
 		lastColumn.setMinWidth(40);
+	}
+	
+	/**
+	 * 打开路径为fileName的XML文件
+	 * @param dirPath
+	 * @param fileName
+	 */
+	public void openXMLFile(String dirPath, String fileName) {
+		currenFilePath = Configuration.getStorePath() + dirPath + File.separator + fileName;
+		XMLFileProxy.load(linkMans, currenFilePath);
+		updateTable(linkMans);
+		showTable();
 	}
 }

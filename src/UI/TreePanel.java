@@ -102,27 +102,31 @@ public class TreePanel extends JPanel {
 	 */
 	private void createPopupMenu() {
 		popup = new JPopupMenu();
+		
+		JMenuItem openFile = new JMenuItem("打开");
 		JMenu addMenu = new JMenu("添加");
-		JMenuItem addFile = new JMenuItem("文件夹");
-		JMenuItem addPhoneBook = new JMenuItem("电话本");
+		JMenuItem addFile = new JMenuItem("文件");
 		JMenuItem addLinkMan = new JMenuItem("联系人");
-		
 		addMenu.add(addFile);
-		addMenu.add(addPhoneBook);
 		addMenu.add(addLinkMan);
-		
 		JMenuItem renameMenu = new JMenuItem("重命名");
 		JMenuItem deleteMenu = new JMenuItem("删除");
 		JMenuItem properties = new JMenuItem("属性");
 		
+		popup.add(openFile);
 		popup.add(addMenu);
 		popup.add(renameMenu);
 		popup.add(deleteMenu);
 		popup.add(properties);
 		
-		addPhoneBook.addActionListener(new ActionListener(){
-
-			@Override
+		openFile.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				String[] file = getFile();
+				openFile(file[0], file[1]);
+			}
+		});
+		
+		addFile.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				addTreeNode(e);
 			}
@@ -133,17 +137,33 @@ public class TreePanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				StringBuffer filePath = new StringBuffer();
-				Object[] path = selPath.getPath();
-				for(int i = 1; i < path.length - 1; i++)
-					filePath.append(File.separator + path[i].toString());
-				addLinkMans(new String(filePath), path[path.length - 1] + ".xml");
+				String[] file = getFile();
+				addLinkMans(file[0], file[1]);
 			}
 			
 		});
 
 	}
 	
+
+	
+	/**
+	 * 返回长度为2的字符串数组，地各位叶子节点的所在的目录路径，第二个为叶子节点所代表的文件路径
+	 */
+	private String[] getFile(){
+		StringBuffer filePath = new StringBuffer();
+		Object[] path = selPath.getPath();
+		for(int i = 1; i < path.length - 1; i++)
+			filePath.append(File.separator + path[i].toString());
+		String[] result = {new String(filePath), path[path.length - 1] + ".xml"};
+		return result;
+	}
+	
+	
+	/**
+	 * 添加新节点
+	 * @param e
+	 */
 	public void addTreeNode(ActionEvent e) {
 		DefaultMutableTreeNode parent = (DefaultMutableTreeNode)
 			jtree.getLastSelectedPathComponent();
@@ -153,12 +173,13 @@ public class TreePanel extends JPanel {
 		}
 		
 		String nodeName = JOptionPane.showInputDialog(null,
-				"enter a child node for" + parent,
-				"Add a child",JOptionPane.QUESTION_MESSAGE
+				"添加文件" ,
+				"添加文件",JOptionPane.QUESTION_MESSAGE
 				);
+		if(nodeName == null || nodeName.length() == 0)
+			return ;
 		
 		parent.add(new DefaultMutableTreeNode(nodeName));
-		
 		((DefaultTreeModel)(jtree.getModel())).reload();
 	}
 	
@@ -169,5 +190,13 @@ public class TreePanel extends JPanel {
 		parentPanel.showLinkManAddPanel(dirPath, fileName);	
 	}
 	
+	/**
+	 * 打开该叶子节点所指定的文件
+	 * @param dirPath
+	 * @param fileName
+	 */
+	public void openFile(String dirPath, String fileName) {
+		parentPanel.openXMLFile(dirPath, fileName);	
+	}
 
 }

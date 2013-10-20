@@ -1,9 +1,6 @@
 package run;
 
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
-import util.Configuration;
 import UI.MainUI;
 
 public class Main {

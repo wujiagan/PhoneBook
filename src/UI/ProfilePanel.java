@@ -22,6 +22,10 @@ import user.LinkMan;
 
 public class ProfilePanel extends JPanel{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JTextField textName, textAddress, textPhone, textEmail;
 	private JComboBox groundBox = null ;
 	private JButton btnNext, btnPre, btnAlter, btnBack;
@@ -124,7 +128,6 @@ public class ProfilePanel extends JPanel{
 		btnPre.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				preProfile();
 			}
 		});
@@ -132,14 +135,12 @@ public class ProfilePanel extends JPanel{
 		btnNext.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				nextProfile();
 			}
 		});
 		
 		btnAlter.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				if(saveProfile())
 					JOptionPane.showMessageDialog(null, "保存成功！", "提醒", JOptionPane.PLAIN_MESSAGE);
 			}

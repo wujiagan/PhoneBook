@@ -2,8 +2,6 @@ package util;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Iterator;
-import java.util.Observable;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -49,8 +47,6 @@ public class Configuration {
 		try {
 			doc = reader.read(configFile);
 		} catch (DocumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		Element root = doc.getRootElement();
 		Element configuration = root.element("configuration");
@@ -76,10 +72,10 @@ public class Configuration {
 		return configFile.exists();
 	}
 	
-	private static void updataConfigFile() {
-		
-	}
-	
+	/**
+	 * 返回工作目录路径
+	 * @return
+	 */
 	public static String getStorePath() {
 		if(configFile.exists()){
 			SAXReader reader = new SAXReader();
@@ -87,8 +83,6 @@ public class Configuration {
 			try {
 				doc = reader.read(configFile);
 			} catch (DocumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 			Element root = doc.getRootElement();
 			return root.elementText("storePath");	

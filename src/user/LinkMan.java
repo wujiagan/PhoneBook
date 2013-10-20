@@ -31,6 +31,14 @@ public class LinkMan {
 		this.address = info[4];
 	}
 	
+	public LinkMan(String name, String mobilePhone, String address, String email, int ground) {
+		this.name = name;
+		this.mobilePhone = mobilePhone;
+		this.address = address;
+		this.email = email;
+		this.ground = ground;
+	}
+	
 	public String getName() {
 		return name;
 	}

@@ -25,6 +25,10 @@ import util.XMLFileProxy;
 
 public final class LinkManAddPanel extends JPanel{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JTextField textName, textAddress, textPhone, textEmail;
 	private JComboBox groundBox = null ;
 	private JButton btnSave, btnBack;
@@ -112,10 +116,15 @@ public final class LinkManAddPanel extends JPanel{
 		
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				if(saveProfile(fileName))
 					JOptionPane.showMessageDialog(null, "保存成功！", "提醒", JOptionPane.PLAIN_MESSAGE);
 			}
+		});
+		
+		btnBack.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				goBack();
+			}	
 		});
 	
 		this.setOpaque(false);
@@ -139,7 +148,7 @@ public final class LinkManAddPanel extends JPanel{
 
 	
 	/**
-	 * 设置操作文件对象
+	 * 设置操作文件对象,根据用户在treePanel选择的节点
 	 * @param dirName
 	 * @param fileName
 	 */
@@ -147,12 +156,14 @@ public final class LinkManAddPanel extends JPanel{
 		File file = new File(Configuration.getStorePath() + dirPath) ;
 		if(!file.exists())
 			FileProxy.createDir(Configuration.getStorePath() + dirPath);
-		this.fileName = fileName ;
+		this.fileName = Configuration.getStorePath() + dirPath + File.separator +fileName ;
 	}
 
 	
 		
-	
+	public void goBack() {
+		parent.showTable();
+	}
 	
 	/**
 	 * 设置背景图

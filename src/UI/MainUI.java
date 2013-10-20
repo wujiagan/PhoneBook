@@ -2,7 +2,6 @@ package UI;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -15,12 +14,9 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Stack;
-import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -30,25 +26,12 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.JToolBar;
-import javax.swing.JTree;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 
-import table.WDefaultTableModel;
-import user.LinkMan;
+
 import user.User;
 import util.Configuration;
-import util.DataOperate;
-import util.FileProxy;
+
 
 public class MainUI extends JFrame implements Observer{
 	
@@ -76,6 +59,11 @@ public class MainUI extends JFrame implements Observer{
 	 */
 	private PathInitPanel pathPanel = null ;
 	
+	/**
+	 * 查找面板
+	 */
+	private FindPanel findPanel = null;
+	
 	private int numHome = 0;
 	private String nowLocation = "home" ;
 	
@@ -96,6 +84,7 @@ public class MainUI extends JFrame implements Observer{
 	public MainUI(){
 		
 		pathPanel = new PathInitPanel(this);
+		findPanel = new FindPanel(this);
 		
 		user.addObserver(this);
 		this.setLayout(new BorderLayout());
@@ -134,9 +123,7 @@ public class MainUI extends JFrame implements Observer{
 		};
 		
 		MouseWheelListener mouseWheellistener =  new MouseWheelListener(){
-			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
-				// TODO Auto-generated method stub
 				nextTheme(e);
 			}
 		};
@@ -225,7 +212,7 @@ public class MainUI extends JFrame implements Observer{
 		userMenu = new JMenu("用户");
 		
 		JMenuItem saveItem = new JMenuItem("保存");
-		JMenuItem openItem = new JMenuItem("打开");
+		JMenuItem openItem = new JMenuItem("导入");
 		JMenuItem exportItem = new JMenuItem("导出excel");
 		JMenuItem sortItem = new JMenuItem("排序");
 		JMenuItem chooseItem = new JMenuItem("更改储存路径");
@@ -247,38 +234,26 @@ public class MainUI extends JFrame implements Observer{
 		userMenu.add(logoutItem);
 		
 		loginItem.addActionListener(new ActionListener(){
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
 				loginPanel.showLoginDiglog();
 			}
 		});
 		
 		sortItem.addActionListener(new ActionListener(){
-
-			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				if(isOpen)
 					tablePanel.sort();
 			}
-			
 		});
 		
 		chooseItem.addActionListener(new ActionListener(){
-
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				pathPanel.showDialog();
 			}
-			
 		});
 		
 		changePassWordItem.addActionListener(new ActionListener(){
-
-			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				if(user.isLogin())
 					registerPanel.showChangePasswordDiglog(user);
 				else
@@ -288,19 +263,14 @@ public class MainUI extends JFrame implements Observer{
 		});
 		
 		registerItem.addActionListener(new ActionListener(){
-
-			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				registerPanel.showRegisterDiglog();
 			}
-			
 		});
 		
 		logoutItem.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
 				user.initUser();
 				loginItem.setText("登录");
 				loginItem.setEnabled(true);
@@ -308,29 +278,19 @@ public class MainUI extends JFrame implements Observer{
 		});
 		
 		saveItem.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
+			public void actionPerformed(ActionEvent e){
 				tablePanel.saveFile();
 			}
 		});
 		
 		openItem.addActionListener(new ActionListener(){
-
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
 				openFile();
-			}
-				
+			}	
 		});
 		
 		exportItem.addActionListener(new ActionListener(){
-
-			@SuppressWarnings("unchecked")
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				// TODO Auto-generated method stub
 				tablePanel.exportExcel();
 			}
 				
@@ -382,15 +342,17 @@ public class MainUI extends JFrame implements Observer{
 				getClass().getResource("/UI/image/setup.png")));
 		setButton(jbtSetUp);
 		
+		JButton jbtSearch = new JButton("查找",new ImageIcon(
+				getClass().getResource("/UI/image/find.png")));
+		setButton(jbtSearch);
+		
 		jbtBack.addActionListener(new ActionListener(){
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				showBack();
 			}
 		});
 		
 		jbtAhead.addActionListener(new ActionListener(){
-			@Override
 			public void actionPerformed(ActionEvent e) {
 				showAhead();
 			}
@@ -404,20 +366,21 @@ public class MainUI extends JFrame implements Observer{
 		});
 
 		jbtSave.addActionListener(new ActionListener(){
-			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				tablePanel.saveFile();
 			}
 		});
 		
 		jbtDelete.addActionListener(new ActionListener(){
-
-			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				tablePanel.deleteTableData();
+			}	
+		});
+		
+		jbtSearch.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				findPanel.showDialog();
 			}
-			
 		});
 
 		tool.setFloatable(true);
@@ -431,6 +394,7 @@ public class MainUI extends JFrame implements Observer{
 		tool.add(jbtGround);
 		tool.add(jbtSafe);
 		tool.add(jbtSetUp);
+		tool.add(jbtSearch);
 		
 		add(tool,BorderLayout.NORTH);
 		
@@ -452,7 +416,6 @@ public class MainUI extends JFrame implements Observer{
 	 * 当用户改变时该函数被触发
 	 */
 	public void update(Observable o, Object arg) {
-		// TODO Auto-generated method stub
 		if(user.isLogin()){
 			this.loginItem.setText("用户:" + user.getName());
 			this.loginItem.setEnabled(false);
