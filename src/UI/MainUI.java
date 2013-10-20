@@ -72,6 +72,9 @@ public class MainUI extends JFrame implements Observer{
 	
 	private JMenuItem loginItem;
 	
+	/**
+	 * 数据操作面板
+	 */
 	private TablePanel tablePanel = new TablePanel();
 	
 	private boolean isOpen = false;
@@ -143,6 +146,7 @@ public class MainUI extends JFrame implements Observer{
 			cardLayout.show(cardPanel, "table");
 	}
 	
+	
 	/** 
 	 * 转动鼠标滑轮,显示不同界面、
 	 * @param e
@@ -211,6 +215,7 @@ public class MainUI extends JFrame implements Observer{
 		fileMenu = new JMenu("菜单");
 		userMenu = new JMenu("用户");
 		
+		JMenuItem newItem = new JMenuItem("新建");
 		JMenuItem saveItem = new JMenuItem("保存");
 		JMenuItem openItem = new JMenuItem("导入");
 		JMenuItem exportItem = new JMenuItem("导出excel");
@@ -222,6 +227,7 @@ public class MainUI extends JFrame implements Observer{
 		JMenuItem changePassWordItem = new JMenuItem("修改密码");
 		JMenuItem logoutItem = new JMenuItem("安全退出");
 		
+		fileMenu.add(newItem);
 		fileMenu.add(saveItem);
 		fileMenu.add(openItem);
 		fileMenu.add(exportItem);
@@ -232,6 +238,14 @@ public class MainUI extends JFrame implements Observer{
 		userMenu.add(registerItem);
 		userMenu.add(changePassWordItem);
 		userMenu.add(logoutItem);
+		
+		newItem.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				if(tablePanel.newFileDir())
+					showTable() ;
+			}
+		});
 		
 		loginItem.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {

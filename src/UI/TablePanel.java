@@ -331,4 +331,8 @@ public class TablePanel extends JPanel {
 		updateTable(linkMans);
 		showTable();
 	}
+	
+	public boolean newFileDir() {
+		return treePanel.addToRoot();
+	}
 }

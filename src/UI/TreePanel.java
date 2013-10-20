@@ -42,14 +42,19 @@ public class TreePanel extends JPanel {
 	private TablePanel parentPanel = null;
 	private TreePath selPath;
 	
+	/**
+	 * 定义根节点，为方便操作所以定义为全局变量
+	 */
+	private DefaultMutableTreeNode root;
+	
+	/**
+	 * 方便使用定义成全局变量
+	 */
+	private JMenuItem addLinkMan = null;
+	
 	public TreePanel(TablePanel parentPanel){
 		this.parentPanel = parentPanel;
-		DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
-		DefaultMutableTreeNode major1 = new DefaultMutableTreeNode("软件学院");
-		DefaultMutableTreeNode major2 = new DefaultMutableTreeNode("艺术学院");
-		major1.add(new DefaultMutableTreeNode("软工R3班"));
-		root.add(major1);
-		root.add(major2);
+		root = new DefaultMutableTreeNode("root");
 		jtree = new JTree(new DefaultTreeModel(root));
 		jtree.setRowHeight(40);
 		jtree.setRootVisible(false);
@@ -71,12 +76,17 @@ public class TreePanel extends JPanel {
 				selPath = jtree.getPathForLocation(e.getX(), e.getY());
 				if(selRow != -1) {
 				    if(e.getClickCount() == 1) {
-				        mySingleClick(selRow, selPath);
+				        
 				    }
 				    else if(e.getClickCount() == 2) {
-				        myDoubleClick(selRow, selPath);
+
 				    }
 				    if(e.getButton() == e.BUTTON3) {
+				    	TreePath path = jtree.getSelectionPath();
+				    	if(path != null && ((DefaultMutableTreeNode)path.getLastPathComponent()).isLeaf())
+				    		isLeafOperate();
+				    	else
+				    		isNotLeafOperate();
 				    	popup.show(e.getComponent(),e.getX(),e.getY());
 				    }
 				}
@@ -85,16 +95,6 @@ public class TreePanel extends JPanel {
 		
 		jtree.addMouseListener(ml);
 
-	}
-	
-	private void mySingleClick(int selRow, TreePath selPath) {
-		System.out.println(selRow);
-		System.out.println();
-	}
-	
-	private void myDoubleClick(int selRow, TreePath selPath) {
-		System.out.println(selRow);
-		System.out.println(selPath);
 	}
 	
 	/**
@@ -106,7 +106,7 @@ public class TreePanel extends JPanel {
 		JMenuItem openFile = new JMenuItem("打开");
 		JMenu addMenu = new JMenu("添加");
 		JMenuItem addFile = new JMenuItem("文件");
-		JMenuItem addLinkMan = new JMenuItem("联系人");
+		addLinkMan = new JMenuItem("联系人");
 		addMenu.add(addFile);
 		addMenu.add(addLinkMan);
 		JMenuItem renameMenu = new JMenuItem("重命名");
@@ -134,31 +134,57 @@ public class TreePanel extends JPanel {
 		});
 		
 		addLinkMan.addActionListener(new ActionListener(){
-			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				String[] file = getFile();
 				addLinkMans(file[0], file[1]);
 			}
 			
 		});
+		
+		deleteMenu.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				deleteTreeNode(e);
+			}
+		});
 
 	}
 	
+	/**
+	 * 当前选择为叶子节点，某些按钮可用
+	 */
+	public void isLeafOperate() {
+		addLinkMan.setEnabled(true);
+	}
+	
+	/**
+	 * 当前选择为叶子节点，某些按钮不可用
+	 */
+	public void isNotLeafOperate() {
+		addLinkMan.setEnabled(false);
+	}
 
 	
 	/**
 	 * 返回长度为2的字符串数组，地各位叶子节点的所在的目录路径，第二个为叶子节点所代表的文件路径
 	 */
 	private String[] getFile(){
-		StringBuffer filePath = new StringBuffer();
 		Object[] path = selPath.getPath();
-		for(int i = 1; i < path.length - 1; i++)
-			filePath.append(File.separator + path[i].toString());
-		String[] result = {new String(filePath), path[path.length - 1] + ".xml"};
+		String[] result = {getDir(), path[path.length - 1] + ".xml"};
 		return result;
 	}
 	
+	/**
+	 * 返回当前节点对应的目录
+	 * @return
+	 */
+	private String getDir() {
+		StringBuffer filePath = new StringBuffer();
+		Object[] path = selPath.getPath();
+		for(int i = 1; i < path.length; i++)
+			filePath.append(File.separator + path[i].toString());
+		return filePath.toString();
+	}
 	
 	/**
 	 * 添加新节点
@@ -176,12 +202,77 @@ public class TreePanel extends JPanel {
 				"添加文件" ,
 				"添加文件",JOptionPane.QUESTION_MESSAGE
 				);
-		if(nodeName == null || nodeName.length() == 0)
+		
+		if(nodeName == null || "".equals(nodeName))
 			return ;
 		
+		FileProxy.createDir(Configuration.getStorePath() + getDir() + File.separator + nodeName);
+		
 		parent.add(new DefaultMutableTreeNode(nodeName));
+		
 		((DefaultTreeModel)(jtree.getModel())).reload();
 	}
+	
+	/**
+	 * 直接向根节点添加节点
+	 * @return 创建成功返回true，失败返回false
+	 */
+	public boolean addToRoot() {
+		String nodeName = JOptionPane.showInputDialog(null,
+				"新建文件夹" ,
+				"新建文件夹",JOptionPane.QUESTION_MESSAGE
+				);
+		
+		if(nodeName == null || "".equals(nodeName)){
+			JOptionPane.showMessageDialog(null, "新建文件夹失败", "提醒", JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+		
+		
+		FileProxy.createDir(Configuration.getStorePath() + File.separator + nodeName);
+		
+		root.add(new DefaultMutableTreeNode(nodeName));
+		
+		((DefaultTreeModel)(jtree.getModel())).reload();	
+		return true;
+	}
+	
+	/**
+	 * 删除当前节点
+	 * @param e
+	 */
+	public void deleteTreeNode(ActionEvent e) {
+		
+		TreePath path = jtree.getSelectionPath();
+		
+		System.out.println(path);
+		
+		if(path == null){
+			JOptionPane.showMessageDialog(null, "你没有选择任何文件");
+			return ;
+		}
+		
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+			(path.getLastPathComponent());
+		
+		Object[] temp = path.getPath();
+		StringBuffer filePath = new StringBuffer();
+		for(int i=1; i<temp.length; i++)
+			filePath.append(File.separator + temp[i].toString());
+		if(node.isLeaf()){
+			filePath.append(".xml");
+		}
+		
+		if(node.isRoot())
+			JOptionPane.showMessageDialog(null, "非法操作，cannot remoe the root");
+		else{
+			/** 删除关联文件*/
+			FileProxy.DeleteFolder(Configuration.getStorePath() + filePath.toString());
+			node.removeFromParent();
+		}
+		((DefaultTreeModel)(jtree.getModel())).reload();
+	}
+	
 	
 	/**
 	 * 添加新联系人
@@ -198,5 +289,6 @@ public class TreePanel extends JPanel {
 	public void openFile(String dirPath, String fileName) {
 		parentPanel.openXMLFile(dirPath, fileName);	
 	}
+	
 
 }

@@ -108,6 +108,10 @@ public class FileProxy {
 		}
 	}
 	
+	/**
+	 * 根据路径path新建文件夹
+	 * @param path
+	 */
 	public static void createDir(String path){
 		File file = new File(path);
 		createParentfile(file);
@@ -123,4 +127,73 @@ public class FileProxy {
 		}
 			
 	}
+	
+	
+    /**
+     *  根据路径删除指定的目录或文件，无论存在与否
+     *@param path  要删除的目录或文件
+     *@return 删除成功返回 true，否则返回 false。
+     */
+    public static boolean DeleteFolder(String path) {
+        boolean flag = false;
+        File file = new File(path);
+        if (!file.exists()) {  
+            return flag;
+        } else {
+            if (file.isFile()) { 
+                return deleteFile(path);
+            } else {  
+                return deleteDirectory(path);
+            }
+        }
+    }
+    
+    /**
+     * 删除单个文件
+     * @param   path    被删除文件的文件名
+     * @return 单个文件删除成功返回true，否则返回false
+     */
+    public static boolean deleteFile(String path) {
+        boolean flag = false;
+        File file = new File(path);
+        if (file.isFile() && file.exists()) {
+            file.delete();
+            flag = true;
+        }
+        return flag;
+    }
+    
+    /**
+     * 删除目录（文件夹）以及目录下的文件
+     * @param   path 被删除目录的文件路径
+     * @return  目录删除成功返回true，否则返回false
+     */
+    public static boolean deleteDirectory(String path) {
+        //如果path不以文件分隔符结尾，自动添加文件分隔符
+        if (!path.endsWith(File.separator)) {
+            path = path + File.separator;
+        }
+        File dirFile = new File(path);
+        if (!dirFile.exists() || !dirFile.isDirectory()) {
+            return false;
+        }
+        boolean flag = true;
+        File[] files = dirFile.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isFile()) {
+                flag = deleteFile(files[i].getAbsolutePath());
+                if (!flag) break;
+            } 
+            else {
+                flag = deleteDirectory(files[i].getAbsolutePath());
+                if (!flag) break;
+            }
+        }
+        if (!flag) return false;
+        if (dirFile.delete()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
