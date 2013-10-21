@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -19,9 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -47,19 +43,19 @@ public class TablePanel extends JPanel {
 	private JPanel tableView = new JPanel(cardLayout);
 	
 	private Vector<Object> columnNames = new Vector<Object>();
-	
-	private JTextField factor;
-	private JButton find;
-	private boolean isFound = false ;
-	
-	private int[] results = null;
-	private int select, selectRow;
+
+	private int selectRow;
 	
 	private ProfilePanel profilePanel = null;
 	private LinkManAddPanel linkManAddPanel = null;
 	private TreePanel treePanel = null ;
 	
 	private Font font = new Font("宋体", 0, 15);
+	
+	/**
+	 * 创建工具栏
+	 */
+	private JToolBar tool = null;
 	
 	private ImageIcon[] photo = {
 			new ImageIcon(getClass().getResource("/UI/image/user.png")),
@@ -81,11 +77,12 @@ public class TablePanel extends JPanel {
 	
 	
 	public TablePanel(){
+		createToolBar();
 		this.setLayout(null);
 		profilePanel = new ProfilePanel(this);
 		linkManAddPanel = new LinkManAddPanel(this);
 		JPanel tablePanel = new JPanel(new BorderLayout());
-		JPanel findPanel = new JPanel();
+		//JPanel findPanel = new JPanel();
 		Object[] columnDatas = { "群组", "姓名", "手机", "邮箱", "地址", "选择"};
 		
 		for(Object eachData: columnDatas){
@@ -101,42 +98,7 @@ public class TablePanel extends JPanel {
 		table.setSelectionBackground(Color.yellow);
 		setColumnWith();
 		
-		factor = new JTextField(30);
-		find = new JButton("查找",new ImageIcon(
-				getClass().getResource("/UI/image/find.png")));
-		findPanel.add(factor);
-		findPanel.add(find);
 		
-		find.addActionListener(new ActionListener(){
-			@SuppressWarnings("unchecked")
-			public void actionPerformed(ActionEvent arg0) {
-				if(!isFound){
-					results = DataOperate.find(tableModel.getDataVector(), factor.getText()) ;
-					if(results != null || results.length !=0){
-						isFound = true;
-						select = 0;
-						table.setRowSelectionInterval(results[select], results[select]);
-					}
-					else
-						JOptionPane.showMessageDialog(null, "无相关记录", "提醒", JOptionPane.WARNING_MESSAGE);
-				}
-				else{
-					select++;
-					if(select<results.length){
-						find.setText("下一个");
-						table.setRowSelectionInterval(results[select], results[select]);
-					}
-					else{
-						isFound = false ;
-						find.setText("查找");
-						JOptionPane.showMessageDialog(null, "无相关记录", "提醒", JOptionPane.WARNING_MESSAGE);
-					}
-				}
-				
-					
-				
-			}
-		});
 		
 		table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
 			@Override
@@ -156,27 +118,7 @@ public class TablePanel extends JPanel {
 		});
 		
 		
-		
-		factor.getDocument().addDocumentListener(new DocumentListener(){
-
-            public void insertUpdate(DocumentEvent e) {
-                 find.setText("查找");
-                 isFound = false ;
-            }
-
-            public void removeUpdate(DocumentEvent e) {
-            	find.setText("查找");
-            	isFound = false ;
-            }
-
-            public void changedUpdate(DocumentEvent e) {
-            	find.setText("查找");
-            	isFound = false ;
-            }
-        });
-		
-		
-		tablePanel.add(findPanel,BorderLayout.NORTH);
+		tablePanel.add(tool, BorderLayout.EAST);
 		tablePanel.add(new JScrollPane(table),BorderLayout.CENTER);
 		
 		tableView.add(tablePanel,"tablePanel");
@@ -191,6 +133,27 @@ public class TablePanel extends JPanel {
 		this.add(treePanel);
 	}
 	
+	/**
+	 * 创建工具栏
+	 */
+	public void createToolBar() {
+		tool = new JToolBar(JToolBar.VERTICAL);
+		
+		JButton btnAddLinkMan = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/add.png")));
+		tool.add(btnAddLinkMan);
+		
+		JButton btnDelete = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/delete.png")));
+		tool.add(btnDelete);
+		
+		JButton btnFind = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/find.png")));
+		tool.add(btnFind);
+		
+		tool.setBorderPainted(true);
+		
+	}
 	/**
 	 * 
 	 * @return选中的行

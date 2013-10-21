@@ -14,6 +14,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Stack;
@@ -31,6 +32,7 @@ import javax.swing.JToolBar;
 
 import user.User;
 import util.Configuration;
+import util.LoginProxy;
 
 
 public class MainUI extends JFrame implements Observer{
@@ -39,9 +41,19 @@ public class MainUI extends JFrame implements Observer{
 	 * 
 	 */
 	private static final long serialVersionUID = 7489067892021806972L;
+	
+	/**
+	 * 菜单栏
+	 */
 	private JMenuBar menu;
-	private JMenu fileMenu, userMenu;
+	/**
+	 * 菜单组
+	 */
+	private JMenu fileMenu, userMenu, helpMenu;
 
+	/**
+	 * 定义卡片布局管理器
+	 */
 	private CardLayout cardLayout = new CardLayout();
 	private JPanel cardPanel = new JPanel(cardLayout);
 	
@@ -50,9 +62,20 @@ public class MainUI extends JFrame implements Observer{
 			new HomePanel(getClass().getResource("/UI/image/jitai.jpg"))
 	};
 	
-	private User user = new User();
-	private LoginPanel loginPanel = new LoginPanel(user);
-	private RegisterPanel registerPanel = new RegisterPanel() ;
+	/**
+	 * 当前用户
+	 */
+	private User currentUser = new User();
+	
+	/**
+	 *登录面板
+	 */
+	private LoginPanel loginPanel = new LoginPanel(currentUser);
+	
+	/**
+	 * 注册面板
+	 */
+	private RegisterPanel registerPanel = null;
 	
 	/**
 	 * 文件储存路径选择面板
@@ -70,7 +93,10 @@ public class MainUI extends JFrame implements Observer{
 	private Stack<String> backStack = new Stack<String>();
 	private Stack<String> aheadStack = new Stack<String>();
 	
-	private JMenuItem loginItem;
+	/**
+	 * 用户设置按钮组
+	 */
+	private JMenuItem loginItem, registerItem, changePassWordItem, logoutItem;
 	
 	/**
 	 * 数据操作面板
@@ -88,8 +114,11 @@ public class MainUI extends JFrame implements Observer{
 		
 		pathPanel = new PathInitPanel(this);
 		findPanel = new FindPanel(this);
+		registerPanel = new RegisterPanel(this);
 		
-		user.addObserver(this);
+		//观察者设计模式
+		currentUser.addObserver(this);
+		
 		this.setLayout(new BorderLayout());
 		add(cardPanel,BorderLayout.CENTER);
 		createMenu(); 
@@ -119,6 +148,7 @@ public class MainUI extends JFrame implements Observer{
 		for(int i = 0; i < 3; i++)
 			cardPanel.add(homePanel[i],"home" + i);
 		cardPanel.add(tablePanel, "table");
+		cardPanel.add(registerPanel, "registerPanel");
 		MouseListener mouseListener =  new MouseAdapter(){
 			public void mouseClicked(MouseEvent e){
 				enter(e);
@@ -191,6 +221,17 @@ public class MainUI extends JFrame implements Observer{
 			nowLocation = "table";
 		}
 	}
+	
+	/** 
+	 * 显示用户注册面板
+	 */
+	public void showRegisterPanel() {
+		cardLayout.show(cardPanel, "registerPanel"); 
+		if(nowLocation != "registerPanel"){
+			backStack.push(nowLocation);
+			nowLocation = "registerPanel";
+		}
+	}
 		
 	public void showBack() {
 		if(!backStack.empty()){
@@ -214,6 +255,7 @@ public class MainUI extends JFrame implements Observer{
 		menu = new JMenuBar();
 		fileMenu = new JMenu("菜单");
 		userMenu = new JMenu("用户");
+		helpMenu = new JMenu("帮助");
 		
 		JMenuItem newItem = new JMenuItem("新建");
 		JMenuItem saveItem = new JMenuItem("保存");
@@ -222,10 +264,12 @@ public class MainUI extends JFrame implements Observer{
 		JMenuItem sortItem = new JMenuItem("排序");
 		JMenuItem chooseItem = new JMenuItem("更改储存路径");
 		
-		loginItem = new JMenuItem("登陆");
-		JMenuItem registerItem = new JMenuItem("注册");
-		JMenuItem changePassWordItem = new JMenuItem("修改密码");
-		JMenuItem logoutItem = new JMenuItem("安全退出");
+		loginItem = new JMenuItem("用户登陆");
+		registerItem = new JMenuItem("账户注册");
+		changePassWordItem = new JMenuItem("修改密码");
+		logoutItem = new JMenuItem("安全退出");
+		
+		JMenuItem declareItem = new JMenuItem("使用说明");
 		
 		fileMenu.add(newItem);
 		fileMenu.add(saveItem);
@@ -235,9 +279,14 @@ public class MainUI extends JFrame implements Observer{
 		fileMenu.add(chooseItem);
 		
 		userMenu.add(loginItem);
-		userMenu.add(registerItem);
+		
+		if(!LoginProxy.isSetRoot())
+			userMenu.add(registerItem);
+		
 		userMenu.add(changePassWordItem);
 		userMenu.add(logoutItem);
+		
+		helpMenu.add(declareItem);
 		
 		newItem.addActionListener(new ActionListener() {
 
@@ -268,8 +317,10 @@ public class MainUI extends JFrame implements Observer{
 		
 		changePassWordItem.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				if(user.isLogin())
-					registerPanel.showChangePasswordDiglog(user);
+				if(currentUser.isLogin()){
+					registerPanel.showChangePasswordDiglog(currentUser);
+					showRegisterPanel();
+				}
 				else
 					JOptionPane.showMessageDialog(null, "请先登录", "提醒", JOptionPane.ERROR_MESSAGE);
 			}
@@ -278,14 +329,14 @@ public class MainUI extends JFrame implements Observer{
 		
 		registerItem.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				registerPanel.showRegisterDiglog();
+				showRegisterPanel();
 			}
 		});
 		
 		logoutItem.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				user.initUser();
+				currentUser.initUser();
 				loginItem.setText("登录");
 				loginItem.setEnabled(true);
 			}
@@ -312,6 +363,7 @@ public class MainUI extends JFrame implements Observer{
 		
 		menu.add(fileMenu);
 		menu.add(userMenu);
+		menu.add(helpMenu);
 		setJMenuBar(menu);
 		
 		JToolBar tool = new JToolBar(JToolBar.HORIZONTAL);
@@ -414,6 +466,10 @@ public class MainUI extends JFrame implements Observer{
 		
 	}
 	
+	public void setRigirter(boolean enible) {
+		registerItem.setEnabled(enible);
+	}
+	
 	/**
 	 * 按钮默认设置
 	 * @param e
@@ -430,8 +486,8 @@ public class MainUI extends JFrame implements Observer{
 	 * 当用户改变时该函数被触发
 	 */
 	public void update(Observable o, Object arg) {
-		if(user.isLogin()){
-			this.loginItem.setText("用户:" + user.getName());
+		if(currentUser.isLogin()){
+			this.loginItem.setText("用户:" + currentUser.getName());
 			this.loginItem.setEnabled(false);
 		}
 	}

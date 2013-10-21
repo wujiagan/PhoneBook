@@ -2,6 +2,7 @@ package UI;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -28,7 +29,17 @@ public class LoginPanel extends JFrame{
 	private JTextField textName;
 	private JPasswordField textPassword;
 	
-	private User user = null;
+	private LoginProxy loginProxy = new LoginProxy() ;
+	
+	/**
+	 * 当前用户
+	 */
+	private User current_user = null;
+	
+	/**
+	 * 设置字体
+	 */
+	private Font font = new Font("宋体", 0, 20);
 	
 	public LoginPanel(){
 		this.setTitle("用户登录");
@@ -43,55 +54,46 @@ public class LoginPanel extends JFrame{
 		
 		JLabel labName = new JLabel("用户名: "); 
 		cont.add(labName);
-		labName.setFont(new java.awt.Font("宋体", 0, 20));
+		labName.setFont(font);
 		labName.setBounds(30, 60, 100, 40);
 		
 		textName = new JTextField(20);
+		textName.setFont(font);
 		cont.add(textName);
 		textName.setBounds(120, 60, 300, 40);
 		
 		JLabel labPassWord = new JLabel("密码: "); 
 		cont.add(labPassWord);
-		labPassWord.setFont(new java.awt.Font("宋体", 0, 20));
+		labPassWord.setFont(font);
 		labPassWord.setBounds(30, 130, 100, 40);
 		
 		textPassword = new JPasswordField(20);
+		textPassword.setFont(font);
 		cont.add(textPassword);
 		textPassword.setBounds(120, 130, 300, 40);
 		
-		JButton btnLogin = new JButton(new ImageIcon(
-				getClass().getResource("/UI/image/btnLogin.png")));
+		JButton btnLogin = new JButton("确定");
 		cont.add(btnLogin);
 		btnLogin.setBorderPainted(false);
 		btnLogin.setContentAreaFilled(false);
 		btnLogin.setBounds(120, 200, 120, 60);
 		
-		JButton btnRegister = new JButton(new ImageIcon(
-				getClass().getResource("/UI/image/btnRegister.png")));
-		btnRegister.setBorderPainted(false);
-		btnRegister.setContentAreaFilled(false);
-		cont.add(btnRegister);
-		btnRegister.setBounds(270, 200, 120, 60);
+		JButton btnCancel = new JButton("退出");
+		btnCancel.setBorderPainted(false);
+		btnCancel.setContentAreaFilled(false);
+		cont.add(btnCancel);
+		btnCancel.setBounds(270, 200, 120, 60);
 		
 		btnLogin.addActionListener(new ActionListener(){
-
-			@SuppressWarnings("deprecation")
-			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				user.setName(textName.getText());
-				user.setPassword(textPassword.getText());
-				LoginProxy.userLogin(user);
-				closeLoginDiglog();
+				if(loginProxy.userLogin(current_user, textName.getText(), textPassword.getText()))
+					closeLoginDiglog();
 			}
 			
 		});
 		
-		btnRegister.addActionListener(new ActionListener(){
-
-			@Override
+		btnCancel.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				closeLoginDiglog();
 			}
 			
@@ -109,7 +111,7 @@ public class LoginPanel extends JFrame{
 	
 	public LoginPanel(User user){
 		this();
-		this.user = user;
+		this.current_user = user;
 	}
 	
 	/** 

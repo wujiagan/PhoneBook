@@ -1,13 +1,14 @@
 package UI;
 
-import java.awt.Container;
-import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
-import javax.swing.ImageIcon;
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -19,7 +20,7 @@ import javax.swing.JTextField;
 import user.User;
 import util.LoginProxy;
 
-public class RegisterPanel extends JFrame{
+public class RegisterPanel extends JPanel{
 	
 	/**
 	 * 
@@ -29,66 +30,76 @@ public class RegisterPanel extends JFrame{
 	private JTextField textName;
 	private JPasswordField textPassWordFirst, textPassWordSecond;
 	private JLabel labPassWordFirst, labPassWordSecond;
+	
+	/**
+	 * 当前用户
+	 */
 	private User currenUser = null ;
 	
 	private boolean isRegister = true;	//标志当前对话时修改密码，还是用户注册
 	
-	public RegisterPanel(){
-		this.setTitle("用户注册");
-		ImageIcon img = new ImageIcon(
-				getClass().getResource("/UI/image/register.jpg"));
-		img.setImage(img.getImage().getScaledInstance(600, 500, Image.SCALE_DEFAULT));
-		JLabel imgLabel = new JLabel(img);
-		this.getLayeredPane().add(imgLabel, new Integer(Integer.MIN_VALUE));
-		imgLabel.setBounds(0,0,img.getIconWidth(), img.getIconHeight());
-		Container cont = this.getContentPane();
-		cont.setLayout(null);
+	private Font font = new java.awt.Font("宋体", 0, 20);
+	
+	private MainUI parent = null;
+	
+	public RegisterPanel(MainUI parent){
+		
+		this.parent = parent;
+		
+		this.setLayout(null);
 		
 		JLabel labName = new JLabel("用户名: "); 
-		cont.add(labName);
-		labName.setFont(new java.awt.Font("宋体", 0, 20));
-		labName.setBounds(30, 60, 100, 40);
+		this.add(labName);
+		labName.setFont(font);
+		labName.setBounds(40, 60, 100, 40);
 		
 		textName = new JTextField(20);
-		cont.add(textName);
-		textName.setBounds(120, 60, 300, 40);
+		this.add(textName);
+		textName.setFont(font);
+		textName.setBounds(140, 60, 300, 40);
 		
 		labPassWordFirst = new JLabel("密码: "); 
-		cont.add(labPassWordFirst);
-		labPassWordFirst.setFont(new java.awt.Font("宋体", 0, 20));
-		labPassWordFirst.setBounds(30, 130, 100, 40);
+		this.add(labPassWordFirst);
+		labPassWordFirst.setFont(font);
+		labPassWordFirst.setBounds(40, 130, 100, 40);
 		
 		textPassWordFirst = new JPasswordField(20);
-		cont.add(textPassWordFirst);
-		textPassWordFirst.setBounds(120, 130, 300, 40);
+		this.add(textPassWordFirst);
+		textPassWordFirst.setBounds(140, 130, 300, 40);
 		
 		labPassWordSecond = new JLabel("密码确认: "); 
-		cont.add(labPassWordSecond);
+		this.add(labPassWordSecond);
 		labPassWordSecond.setFont(new java.awt.Font("宋体", 0, 20));
-		labPassWordSecond.setBounds(30, 190, 100, 40);
+		labPassWordSecond.setBounds(40, 200, 100, 40);
 		
 		textPassWordSecond = new JPasswordField(20);
-		cont.add(textPassWordSecond);
-		textPassWordSecond.setBounds(120, 190, 300, 40);
+		this.add(textPassWordSecond);
+		textPassWordSecond.setBounds(140, 200, 300, 40);
 		
 		JButton btnSure = new JButton("确认");
-		cont.add(btnSure);
-		btnSure.setBounds(140, 250, 90, 40);
+		this.add(btnSure);
+		btnSure.setBounds(140, 270, 90, 40);
 		
 		JButton btnCancel = new JButton("取消");
-		cont.add(btnCancel);
-		btnCancel.setBounds(270, 250, 90, 40);
+		this.add(btnCancel);
+		btnCancel.setBounds(270, 270, 90, 40);
 		
 		btnSure.addActionListener(new ActionListener(){
 			@SuppressWarnings("deprecation")
-			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				if(textPassWordFirst.getText().equals(textPassWordSecond.getText()))
-					if(isRegister)
+				if("".equals(textPassWordFirst.getText())){
+					JOptionPane.showMessageDialog(null, "密码不能为空", "提醒", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				if(textPassWordFirst.getText().equals(textPassWordSecond.getText())){
+					if(isRegister){
 						userRegister(textName.getText(), textPassWordFirst.getText());
+						closeResgisterFuction();
+					}
 					else
 						changePassword(textName.getText(), textPassWordFirst.getText());
+					goBack();
+				}
 				else
 					JOptionPane.showMessageDialog(null, "两次输入的密码不一样", "提醒", JOptionPane.ERROR_MESSAGE);
 				
@@ -96,26 +107,31 @@ public class RegisterPanel extends JFrame{
 		});
 		
 		btnCancel.addActionListener(new ActionListener(){
-			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				closeRegisterDiglog();
+				goBack();
 			}	
 		});
 		
-		((JPanel)cont).setOpaque(false);
-		
-		this.setSize(600,500);
-		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setLocation((screen.width-this.getSize().width)/2,
-				(screen.height-this.getSize().height)/2);
-		this.setResizable(false);
-		this.setVisible(false);
+	}
+	
+	/**
+	 *用户注册完成，关闭注册功能
+	 */
+	public void closeResgisterFuction() {
+		parent.setRigirter(false);
+	}
+	
+	/**
+	 * 返回首页
+	 */
+	public void goBack() {
+		parent.showHome();
 	}
 	
 	/** 用户注册 */
 	public void userRegister(String name,String password){
-		if(LoginProxy.userRegister(name, password)){
+		LoginProxy loginProxy = new LoginProxy();
+		if(loginProxy.userRegister(name, password)){
 			JOptionPane.showMessageDialog(null, "注册成功", "提醒", JOptionPane.PLAIN_MESSAGE);
 			initRegisterDiglog();
 		}
@@ -123,8 +139,14 @@ public class RegisterPanel extends JFrame{
 			JOptionPane.showMessageDialog(null, "注册失败", "提醒", JOptionPane.ERROR_MESSAGE);
 	}
 	
+	/**
+	 * 修改密码
+	 * @param name
+	 * @param password
+	 */
 	public void changePassword(String name,String password){
-		if(LoginProxy.changePassword(currenUser, password)){
+		LoginProxy loginProxy = new LoginProxy();
+		if(loginProxy.changePassword(currenUser, password)){
 			JOptionPane.showMessageDialog(null, "修改成功", "提醒", JOptionPane.PLAIN_MESSAGE);
 			initRegisterDiglog();
 		}
@@ -132,24 +154,16 @@ public class RegisterPanel extends JFrame{
 			JOptionPane.showMessageDialog(null, "修改失败", "提醒", JOptionPane.ERROR_MESSAGE);
 	}
 	
-	/** 显示登录对话框 */
-	public void showRegisterDiglog(){
-		this.setVisible(true);
-	}
 	
 	/** 显示修改密码对话框 */
 	public void showChangePasswordDiglog(User user){
 		this.textName.setText(user.getName());
+		this.textName.setEditable(false);
 		currenUser = user;
 		this.textPassWordFirst.setText("");
 		this.textPassWordSecond.setText("");
-		this.setVisible(true);
 	}
 	
-	/** 关闭登录对话框 */
-	public void closeRegisterDiglog(){
-		this.setVisible(false);
-	}
 	
 	/** 获取用户名 */
 	public String getName(){
@@ -166,7 +180,33 @@ public class RegisterPanel extends JFrame{
 		this.textName.setText("");
 		this.textPassWordFirst.setText("");
 		this.textPassWordSecond.setText("");
-		this.setVisible(false);
+	}
+	
+	/**
+	 * 设置背景图
+	 * @param g
+	 */
+	private void paintBackgroundImage(Graphics g)
+	{
+		Graphics2D g2 = (Graphics2D) g;
+		int width = getWidth();
+		int height = getHeight();
+		Image img = null;
+		try {
+			img = ImageIO.read(new File(getClass().getResource("/UI/image/register.jpg").toURI()));
+		} catch (Exception e) {
+			
+		}    
+		if(img != null)
+			g2.drawImage(img, 0, 0, width, height, this);
+	}
+
+
+	
+	public void paintComponent(Graphics g)
+	{
+		super.paintComponent(g);
+		paintBackgroundImage(g);   
 	}
 }
 
