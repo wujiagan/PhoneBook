@@ -118,6 +118,7 @@ public final class LinkManAddPanel extends JPanel{
 			public void actionPerformed(ActionEvent e) {
 				if(saveProfile(fileName))
 					JOptionPane.showMessageDialog(null, "保存成功！", "提醒", JOptionPane.PLAIN_MESSAGE);
+				goBack();
 			}
 		});
 		
@@ -130,7 +131,16 @@ public final class LinkManAddPanel extends JPanel{
 		this.setOpaque(false);
 	}
 	
-
+	/**
+	 * 清空当前对话框中的数据
+	 */
+	public void clearPanel() {
+		this.textName.setText("");
+		this.textPhone.setText("");
+		this.textEmail.setText("");
+		this.textAddress.setText("");
+		this.groundBox.setSelectedIndex(0);
+	}
 	
 	/**
 	 * 保存当前修改
@@ -142,22 +152,14 @@ public final class LinkManAddPanel extends JPanel{
 		linkMan.setEmail(this.textEmail.getText());
 		linkMan.setAddress(this.textAddress.getText());
 		linkMan.setGround(this.groundBox.getSelectedIndex());
-		XMLFileProxy.writeXML(linkMan, fileName);
+		parent.insert(linkMan);
+		parent.updateTable();
+		clearPanel();
 		return true ;
 	}
 
 	
-	/**
-	 * 设置操作文件对象,根据用户在treePanel选择的节点
-	 * @param dirName
-	 * @param fileName
-	 */
-	public void setOperateFile(String dirPath, String fileName){
-		File file = new File(Configuration.getStorePath() + dirPath) ;
-		if(!file.exists())
-			FileProxy.createDir(Configuration.getStorePath() + dirPath);
-		this.fileName = Configuration.getStorePath() + dirPath + File.separator +fileName ;
-	}
+	
 
 	
 		

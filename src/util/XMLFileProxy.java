@@ -71,6 +71,10 @@ public class XMLFileProxy {
 	@SuppressWarnings("unchecked")
 	public static void load(List<LinkMan> linkMans, String fileName) {
 		File file = new File(fileName);
+		if(!file.exists()){
+			linkMans.clear();
+			return ;
+		}
 		SAXReader reader = new SAXReader();
 		Document doc = null;
 		try {

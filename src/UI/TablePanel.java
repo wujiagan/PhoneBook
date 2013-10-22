@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -48,9 +50,13 @@ public class TablePanel extends JPanel {
 	
 	private ProfilePanel profilePanel = null;
 	private LinkManAddPanel linkManAddPanel = null;
+	
+	/**
+	 * 文件树状图
+	 */
 	private TreePanel treePanel = null ;
 	
-	private Font font = new Font("宋体", 0, 15);
+	private Font font = new Font("宋体", 0, 18);
 	
 	/**
 	 * 创建工具栏
@@ -73,8 +79,9 @@ public class TablePanel extends JPanel {
 	/** 
 	 * 保存当前table数据所对应的文件
 	 */
-	private String currenFilePath = null;
+	private String currenFilePath = "";
 	
+	private FindPanel findPanel = null;
 	
 	public TablePanel(){
 		createToolBar();
@@ -82,7 +89,9 @@ public class TablePanel extends JPanel {
 		profilePanel = new ProfilePanel(this);
 		linkManAddPanel = new LinkManAddPanel(this);
 		JPanel tablePanel = new JPanel(new BorderLayout());
-		//JPanel findPanel = new JPanel();
+		
+		findPanel = new FindPanel(this);
+		
 		Object[] columnDatas = { "群组", "姓名", "手机", "邮箱", "地址", "选择"};
 		
 		for(Object eachData: columnDatas){
@@ -101,7 +110,6 @@ public class TablePanel extends JPanel {
 		
 		
 		table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
-			@Override
 			public void valueChanged(ListSelectionEvent e)
 			{
 				selectRow = table.getSelectedRow();
@@ -147,9 +155,22 @@ public class TablePanel extends JPanel {
 				getClass().getResource("/UI/image/delete.png")));
 		tool.add(btnDelete);
 		
+		btnDelete.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				deleteTableData();
+			}
+			
+		});
+		
 		JButton btnFind = new JButton(new ImageIcon(
 				getClass().getResource("/UI/image/find.png")));
 		tool.add(btnFind);
+		
+		btnFind.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {	
+				findPanel.showDialog();
+			}
+		});
 		
 		tool.setBorderPainted(true);
 		
@@ -165,9 +186,16 @@ public class TablePanel extends JPanel {
 	/**
 	 * 显示添加新联系人对话框
 	 */
-	public void showLinkManAddPanel(String dirName, String fileName) {
+	public void showLinkManAddPanel() {		
 		cardLayout.show(tableView, "linkManAddPanel");
-		linkManAddPanel.setOperateFile(dirName, fileName);
+	}
+	
+	/**
+	 * 添加新联系人到指定文件下
+	 */
+	public void addLinkMan(String dirName, String fileName) {
+		openXMLFile(dirName, fileName);	//更新后台数据
+		showLinkManAddPanel();
 	}
 	
 	/** 
@@ -197,7 +225,7 @@ public class TablePanel extends JPanel {
 	 */
 	@SuppressWarnings("unchecked")
 	public void sort(){
-		tableModel.setDataVector(DataOperate.sort(tableModel.getDataVector(),1), columnNames);
+		//tableModel.setDataVector(DataOperate.sort(tableModel.getDataVector(),1), columnNames);
 	}
 	
 	/**
@@ -205,12 +233,19 @@ public class TablePanel extends JPanel {
 	 */
 	public void deleteTableData() {
 		int len = tableModel.getRowCount();
+		int num = 0;
 		for(int i=len-1; i>=0; i--){
 			if((Boolean)tableModel.getValueAt(i, 5) == true){
+				num++;
 				tableModel.removeRow(i);
 				linkMans.remove(i);
 			}
 		}
+		if(0 == num)
+			JOptionPane.showMessageDialog(null, "没有选择任何联系人", "删除操作", JOptionPane.WARNING_MESSAGE);
+		else
+			JOptionPane.showMessageDialog(null, "删除" + num + "记录！", "删除操作", JOptionPane.PLAIN_MESSAGE);
+			
 	}
 	
 	/**
@@ -226,7 +261,7 @@ public class TablePanel extends JPanel {
 	public boolean importFile() {
 		if(FileProxy.getData(linkMans)){
 			try{
-				updateTable(linkMans);
+				updateTable();
 			}catch(Exception e){
 				JOptionPane.showMessageDialog(null, "选择的文件不合法", "提醒", JOptionPane.WARNING_MESSAGE);
 			}
@@ -239,8 +274,9 @@ public class TablePanel extends JPanel {
 	/**
 	 *  根据linkMans刷新表中数据 
 	 */
-	public void updateTable(List<LinkMan> linkMans) {
+	public void updateTable() {
 		clearTable();
+		DataOperate.sort(linkMans);
 		for(int i = 0; i < linkMans.size(); i++){
 			Vector<Object> newRow = new Vector<Object>();
 			LinkMan linkMan = linkMans.get(i);
@@ -289,13 +325,53 @@ public class TablePanel extends JPanel {
 	 * @param fileName
 	 */
 	public void openXMLFile(String dirPath, String fileName) {
+		if(currenFilePath.equals(Configuration.getStorePath() + dirPath + File.separator + fileName))
+				return ;
+		saveFile();
 		currenFilePath = Configuration.getStorePath() + dirPath + File.separator + fileName;
 		XMLFileProxy.load(linkMans, currenFilePath);
-		updateTable(linkMans);
+		updateTable();
 		showTable();
 	}
 	
+	/**
+	 * 添加新文件
+	 * @return
+	 */
 	public boolean newFileDir() {
 		return treePanel.addToRoot();
 	}
+	
+	/**
+	 * 插入到
+	 * @param linkMan
+	 */
+	public void insert(LinkMan linkMan){
+		linkMans.add(linkMan);
+		updateTable();
+	}
+	
+	/**
+	 * 清空后台数据
+	 */
+	public void clearList() {
+		linkMans.clear();
+	}
+	
+	/**
+	 * 设置选中行
+	 * @param row
+	 */
+	public void setSelect(int row) {
+		table.setRowSelectionInterval(row, row);
+	}
+	
+	/**
+	 * 返回后台数据
+	 * @return
+	 */
+	public List<LinkMan> getLinkMans() {
+		return linkMans;
+	}
+	
 }

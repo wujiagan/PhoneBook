@@ -14,7 +14,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Stack;
@@ -81,11 +80,7 @@ public class MainUI extends JFrame implements Observer{
 	 * 文件储存路径选择面板
 	 */
 	private PathInitPanel pathPanel = null ;
-	
-	/**
-	 * 查找面板
-	 */
-	private FindPanel findPanel = null;
+
 	
 	private int numHome = 0;
 	private String nowLocation = "home" ;
@@ -113,7 +108,6 @@ public class MainUI extends JFrame implements Observer{
 	public MainUI(){
 		
 		pathPanel = new PathInitPanel(this);
-		findPanel = new FindPanel(this);
 		registerPanel = new RegisterPanel(this);
 		
 		//观察者设计模式
@@ -126,9 +120,11 @@ public class MainUI extends JFrame implements Observer{
 		
 		this.addWindowListener(new WindowAdapter(){
 			public void windowClosing(WindowEvent e){
+				tablePanel.saveFile();
 				System.exit(1);
 			}
 		});
+		
 		this.setSize(860,600);
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setLocation((screen.width-this.getSize().width)/2,
@@ -392,10 +388,6 @@ public class MainUI extends JFrame implements Observer{
 				getClass().getResource("/UI/image/address.png")));
 		setButton(jbtAddress);
 		
-		JButton jbtDelete = new JButton("删除",new ImageIcon(
-				getClass().getResource("/UI/image/delete.png")));
-		setButton(jbtDelete);
-		
 		JButton jbtGround = new JButton("用户",new ImageIcon(
 				getClass().getResource("/UI/image/user.png")));
 		setButton(jbtGround);
@@ -407,10 +399,6 @@ public class MainUI extends JFrame implements Observer{
 		JButton jbtSetUp = new JButton("设置",new ImageIcon(
 				getClass().getResource("/UI/image/setup.png")));
 		setButton(jbtSetUp);
-		
-		JButton jbtSearch = new JButton("查找",new ImageIcon(
-				getClass().getResource("/UI/image/find.png")));
-		setButton(jbtSearch);
 		
 		jbtBack.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
@@ -425,7 +413,6 @@ public class MainUI extends JFrame implements Observer{
 		});
 		
 		jbtHome.addActionListener(new ActionListener(){
-			@Override
 			public void actionPerformed(ActionEvent arg0) {		
 				showHome();
 			}
@@ -436,18 +423,7 @@ public class MainUI extends JFrame implements Observer{
 				tablePanel.saveFile();
 			}
 		});
-		
-		jbtDelete.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {
-				tablePanel.deleteTableData();
-			}	
-		});
-		
-		jbtSearch.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				findPanel.showDialog();
-			}
-		});
+
 
 		tool.setFloatable(true);
 		tool.add(jbtBack);
@@ -456,16 +432,18 @@ public class MainUI extends JFrame implements Observer{
 		tool.add(jbtFile);
 		tool.add(jbtSave);
 		tool.add(jbtAddress);
-		tool.add(jbtDelete);
 		tool.add(jbtGround);
 		tool.add(jbtSafe);
 		tool.add(jbtSetUp);
-		tool.add(jbtSearch);
 		
 		add(tool,BorderLayout.NORTH);
 		
 	}
 	
+	/**
+	 * 设置注册功能是否可用
+	 * @param enible
+	 */
 	public void setRigirter(boolean enible) {
 		registerItem.setEnabled(enible);
 	}

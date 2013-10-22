@@ -31,8 +31,16 @@ import util.FileProxy;
  * @author Administrator
  *
  */
-public class TreePanel extends JPanel {
+public final class TreePanel extends JPanel {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * 定义树状图
+	 */
 	private JTree jtree = null;
 	
 	private JPopupMenu popup = new JPopupMenu();
@@ -55,6 +63,7 @@ public class TreePanel extends JPanel {
 	public TreePanel(TablePanel parentPanel){
 		this.parentPanel = parentPanel;
 		root = new DefaultMutableTreeNode("root");
+		loadTree();
 		jtree = new JTree(new DefaultTreeModel(root));
 		jtree.setRowHeight(40);
 		jtree.setRootVisible(false);
@@ -62,7 +71,10 @@ public class TreePanel extends JPanel {
 		jtree.setFont(font);
 		
 		DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer)jtree.getCellRenderer();
-		renderer.setLeafIcon(new ImageIcon(getClass().getResource("/UI/image/phoneBook.png")));
+		
+		renderer.setLeafIcon(new ImageIcon(
+				getClass().getResource("/UI/image/phoneBook.png")));
+		
 		renderer.setBackgroundSelectionColor(Color.yellow);
 		
 		this.setLayout(new GridLayout(1,1));
@@ -71,6 +83,7 @@ public class TreePanel extends JPanel {
 		createPopupMenu();
 
 		MouseListener ml = new MouseAdapter() {
+			@SuppressWarnings("static-access")
 			public void mousePressed(MouseEvent e) {
 				int selRow = jtree.getRowForLocation(e.getX(), e.getY());
 				selPath = jtree.getPathForLocation(e.getX(), e.getY());
@@ -278,7 +291,7 @@ public class TreePanel extends JPanel {
 	 * 添加新联系人
 	 */
 	public void addLinkMans(String dirPath, String fileName) {
-		parentPanel.showLinkManAddPanel(dirPath, fileName);	
+		parentPanel.addLinkMan(dirPath, fileName);	
 	}
 	
 	/**
@@ -290,5 +303,25 @@ public class TreePanel extends JPanel {
 		parentPanel.openXMLFile(dirPath, fileName);	
 	}
 	
-
+	/**
+	 * 根据文件夹显示树结构
+	 */
+	public void loadTree() {
+		loadChildNode(root, new File(Configuration.getStorePath()));
+	}
+	
+	/**
+	 * 递归添加子节点
+	 */
+	public void loadChildNode(DefaultMutableTreeNode node, File file) {
+		File[] childFiles = file.listFiles();
+		for(int i=0; i<childFiles.length; i++){
+			if(childFiles[i].isDirectory()){
+				DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childFiles[i].getName());
+				node.add(childNode);
+				loadChildNode(childNode, childFiles[i]);
+			}
+		}
+	}
+	
 }
