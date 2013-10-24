@@ -3,14 +3,20 @@ package UI;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -19,6 +25,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -27,6 +34,7 @@ import javax.swing.table.TableColumn;
 
 import table.WDefaultTableModel;
 import user.LinkMan;
+import user.User;
 import util.Configuration;
 import util.DataOperate;
 import util.FileProxy;
@@ -71,26 +79,41 @@ public class TablePanel extends JPanel {
 			new ImageIcon(getClass().getResource("/UI/image/stranger.png")),
 	};
 	
+	
 	/**
 	 * 储存table后台数据
 	 */
 	private List<LinkMan> linkMans = new LinkedList<LinkMan>();
 	
+	/**
+	 * 数据缓冲
+	 */
+	private Map<LinkMan, Integer> bufferMap = new HashMap<LinkMan, Integer>();
+	
 	/** 
 	 * 保存当前table数据所对应的文件
 	 */
 	private String currenFilePath = "";
+	/**
+	 * 标志当前文件是否为加锁文件
+	 */
+	private boolean currentFileClock = false;
 	
-	private FindPanel findPanel = null;
+	private JPanel findPanel = null;
 	
-	public TablePanel(){
+	/**
+	 * 保存当前用户
+	 */
+	private User currentUser = null;
+	
+	public TablePanel(User currentUser){
+		this.currentUser = currentUser;
 		createToolBar();
 		this.setLayout(null);
 		profilePanel = new ProfilePanel(this);
 		linkManAddPanel = new LinkManAddPanel(this);
 		JPanel tablePanel = new JPanel(new BorderLayout());
 		
-		findPanel = new FindPanel(this);
 		
 		Object[] columnDatas = { "群组", "姓名", "手机", "邮箱", "地址", "选择"};
 		
@@ -119,20 +142,26 @@ public class TablePanel extends JPanel {
 		table.addMouseListener(new MouseAdapter(){
 			public void mouseClicked(MouseEvent e){
 				if(2 == e.getClickCount()){
-					profilePanel.updateProfilePanel(linkMans, selectRow);
+					if(!bufferMap.isEmpty()){
+						Set<LinkMan> set = bufferMap.keySet();
+						List<LinkMan> list = new LinkedList<LinkMan>(set);
+						profilePanel.showByBufferMap(list, selectRow);
+					}
+					else
+						profilePanel.updateProfilePanel(linkMans, selectRow);
 					cardLayout.show(tableView, "profile");
 				}
 			}
 		});
 		
-		
+		createFindPanel();
+		tablePanel.add(findPanel, BorderLayout.NORTH);
 		tablePanel.add(tool, BorderLayout.EAST);
 		tablePanel.add(new JScrollPane(table),BorderLayout.CENTER);
 		
 		tableView.add(tablePanel,"tablePanel");
 		tableView.add(profilePanel,"profile");
 		tableView.add(linkManAddPanel,"linkManAddPanel");
-		
 		tableView.setBounds(200, 0,654, 505);
 		this.add(tableView);
 		
@@ -140,6 +169,62 @@ public class TablePanel extends JPanel {
 		treePanel.setBounds(0, 0, 200, 505);
 		this.add(treePanel);
 	}
+	
+	/**
+	 * 显示分析面板
+	 */
+	public void showAnalyzePanel(){
+		cardLayout.show(tableView, "analyzePanel");
+	}
+	
+	
+	/**
+	 * 创建查找面板
+	 */
+	public void createFindPanel() {
+		findPanel = new JPanel();
+		final JTextField keyText = new JTextField(30);
+		keyText.setFont(font);
+		
+		JButton btnSure = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/find.png")));
+		btnSure.setBorderPainted(false);
+		
+		btnSure.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String key = keyText.getText();
+				if(!key.equals("")){
+					DataOperate.find(linkMans, key, bufferMap);
+					updateTable(bufferMap);
+					closeFindPanel();
+				}
+				else
+					JOptionPane.showMessageDialog(null, "关键字不能为空", "提示", JOptionPane.PLAIN_MESSAGE);
+			}
+		});
+		
+		
+		
+		findPanel.setLayout(new FlowLayout());
+		findPanel.add(keyText);
+		findPanel.add(btnSure);
+		findPanel.setVisible(false);
+	}
+	
+	/**
+	 * 显示查找面板
+	 */
+	public void showFindPanel() {
+		findPanel.setVisible(true);
+	}
+	
+	/**
+	 * 隐藏查找面板
+	 */
+	public void closeFindPanel() {
+		findPanel.setVisible(false);
+	}
+	
 	
 	/**
 	 * 创建工具栏
@@ -150,10 +235,21 @@ public class TablePanel extends JPanel {
 		JButton btnAddLinkMan = new JButton(new ImageIcon(
 				getClass().getResource("/UI/image/add.png")));
 		tool.add(btnAddLinkMan);
+		btnAddLinkMan.setMnemonic(KeyEvent.VK_A);
+		
+		btnAddLinkMan.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				if(!currenFilePath.equals(""))
+					showLinkManAddPanel();
+				else
+					JOptionPane.showMessageDialog(null, "你还没有打开任何文件", "提示", JOptionPane.PLAIN_MESSAGE);
+			}
+		});
 		
 		JButton btnDelete = new JButton(new ImageIcon(
 				getClass().getResource("/UI/image/delete.png")));
 		tool.add(btnDelete);
+		btnDelete.setMnemonic(KeyEvent.VK_D);
 		
 		btnDelete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -165,12 +261,69 @@ public class TablePanel extends JPanel {
 		JButton btnFind = new JButton(new ImageIcon(
 				getClass().getResource("/UI/image/find.png")));
 		tool.add(btnFind);
+		btnFind.setMnemonic(KeyEvent.VK_F);
 		
 		btnFind.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {	
-				findPanel.showDialog();
+				showFindPanel();
 			}
 		});
+		
+		JButton btnSave = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/save_as.png")));
+		tool.add(btnSave);
+		
+		btnSave.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {	
+				saveFile();
+			}
+		});
+		
+		
+		JButton btnLock = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/lock.png")));
+		tool.add(btnLock);
+		btnLock.setMnemonic(KeyEvent.VK_L);
+		
+		btnLock.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {	
+				lockFile();
+			}
+		});
+		
+		
+		JButton btnImport = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/import.png")));
+		tool.add(btnImport);
+		btnImport.setMnemonic(KeyEvent.VK_I);
+		
+		
+		btnImport.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {	
+				if(!currenFilePath.equals(""))
+					importFile();
+				else
+					JOptionPane.showMessageDialog(null, "你还没有打开任何文件", "提示", JOptionPane.PLAIN_MESSAGE);
+				
+			}
+		});
+		
+		JButton btnExport = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/export.png")));
+		tool.add(btnExport);
+		btnExport.setMnemonic(KeyEvent.VK_E);
+		
+		btnExport.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				if(!currenFilePath.equals(""))
+					exportExcel();
+				else
+					JOptionPane.showMessageDialog(null, "你还没有打开任何文件", "提示", JOptionPane.PLAIN_MESSAGE);
+				
+				
+			}
+		});
+		
 		
 		tool.setBorderPainted(true);
 		
@@ -202,7 +355,7 @@ public class TablePanel extends JPanel {
 	 * 保存table数据
 	 */
 	public void saveFile() {
-		XMLFileProxy.saveToFile(linkMans, currenFilePath);
+		XMLFileProxy.saveToFile(linkMans, currenFilePath, currentFileClock, currentUser.getPassword());
 	}
 	
 	/** 
@@ -220,13 +373,6 @@ public class TablePanel extends JPanel {
 		cardLayout.show(tableView, "tablePanel");
 	}
 	
-	/**
-	 * 将table的数据排序
-	 */
-	@SuppressWarnings("unchecked")
-	public void sort(){
-		//tableModel.setDataVector(DataOperate.sort(tableModel.getDataVector(),1), columnNames);
-	}
 	
 	/**
 	 * 删除表中数据
@@ -291,6 +437,27 @@ public class TablePanel extends JPanel {
 		
 	}
 	
+	
+	/**
+	 *  根据list刷新表中数据 
+	 */
+	public void updateTable(Map<LinkMan, Integer> map) {
+		clearTable();
+		Set<LinkMan> list = map.keySet() ;
+		Iterator<LinkMan> iter = list.iterator();
+		while(iter.hasNext()){
+			Vector<Object> newRow = new Vector<Object>();
+			LinkMan linkMan = iter.next();
+			newRow.add(photo[linkMan.getGround()]);
+			newRow.add(linkMan.getName());
+			newRow.add(linkMan.getMobilePhone());
+			newRow.add(linkMan.getEmail());
+			newRow.add(linkMan.getAddress());
+			newRow.add(false);
+			tableModel.addRow(newRow);
+		}
+		
+	}
 	/**
 	 * 更新第select行的数据
 	 * @param select
@@ -309,9 +476,19 @@ public class TablePanel extends JPanel {
 	 */
 	public void setColumnWith() {
 		TableColumn firsetColumn = table.getColumnModel().getColumn(0);
-		firsetColumn.setPreferredWidth(60);
-		firsetColumn.setMaxWidth(60);
-		firsetColumn.setMinWidth(60);
+		firsetColumn.setPreferredWidth(50);
+		firsetColumn.setMaxWidth(50);
+		firsetColumn.setMinWidth(50);
+		
+		TableColumn SecondColumn = table.getColumnModel().getColumn(1);
+		SecondColumn.setPreferredWidth(90);
+		SecondColumn.setMaxWidth(90);
+		SecondColumn.setMinWidth(90);
+		
+		TableColumn FiveColumn = table.getColumnModel().getColumn(4);
+		FiveColumn.setPreferredWidth(90);
+		FiveColumn.setMaxWidth(90);
+		FiveColumn.setMinWidth(90);
 		
 		TableColumn lastColumn = table.getColumnModel().getColumn(5);
 		lastColumn.setPreferredWidth(40);
@@ -327,12 +504,12 @@ public class TablePanel extends JPanel {
 	public void openXMLFile(String dirPath, String fileName) {
 		if(currenFilePath.equals(Configuration.getStorePath() + dirPath + File.separator + fileName))
 				return ;
-		saveFile();
 		currenFilePath = Configuration.getStorePath() + dirPath + File.separator + fileName;
-		XMLFileProxy.load(linkMans, currenFilePath);
+		XMLFileProxy.load(linkMans, currenFilePath, currentFileClock);
 		updateTable();
 		showTable();
 	}
+	
 	
 	/**
 	 * 添加新文件
@@ -372,6 +549,48 @@ public class TablePanel extends JPanel {
 	 */
 	public List<LinkMan> getLinkMans() {
 		return linkMans;
+	}
+	
+	/**
+	 * 文件上锁
+	 */
+	public void lockFile() {
+		if(currentUser.isLogin()){
+			currentFileClock = true;
+			XMLFileProxy.saveToFile(linkMans, currenFilePath, currentFileClock, currentUser.getPassword());
+		}
+		else
+			JOptionPane.showMessageDialog(null, "你还没有登录", "提示", JOptionPane.WARNING_MESSAGE);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public Map<String, Integer> analyzeByAddress() {
+		Map<String, Integer> temp = new HashMap<String, Integer>();
+		int[] result = new int[linkMans.size()];
+		Iterator<LinkMan> iter = linkMans.iterator();
+		while(iter.hasNext()){
+			LinkMan e = iter.next();
+			if(temp.containsKey(e.getAddress()))
+				result[temp.get(e.getAddress())]++;
+			else
+			{
+				int postion = temp.size();
+				result[postion] = 0;
+				temp.put(e.getName(), postion);
+			}
+		}
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		Set<String> set = temp.keySet();
+		Iterator<String> iterator = set.iterator();
+		while(iterator.hasNext()){
+			String key = iterator.next();
+			map.put(key, result[temp.get(key)]);
+		}
+			
+		return map;
 	}
 	
 }

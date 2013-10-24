@@ -1,8 +1,7 @@
 package util;
 
-import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Map;
 
 import user.LinkMan;
 
@@ -31,19 +30,21 @@ public class DataOperate {
 	 * @param key
 	 * @return
 	 */
-	public static List<Integer> find(List<LinkMan> linkMans, String key){
-		List<Integer> result = new LinkedList<Integer>();
+	public static boolean find(List<LinkMan> linkMans, String key, Map<LinkMan, Integer> result){
+		result.clear();
 		if(isChinese(key)){
 			for(int i=0; i<linkMans.size(); i++)
 				if(linkMans.get(i).getName().indexOf(key) != -1)
-					result.add(i);
+					result.put(linkMans.get(i), i);
 		}
 		else{
 			for(int i=0; i<linkMans.size(); i++)
 				if(PinYin.getPinyin(linkMans.get(i).getName()).indexOf(key) != -1)
-					result.add(i);
+					result.put(linkMans.get(i), i);
 		}
-		return result;
+		if(result.isEmpty())
+			return false;
+		return true;
 	}
 	
 	/**

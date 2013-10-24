@@ -9,6 +9,7 @@ public class WDefaultTableModel extends DefaultTableModel {
 	public WDefaultTableModel(){
 	}
 	
+	@SuppressWarnings("unchecked")
 	public WDefaultTableModel(Vector data, Vector columnNames) {
 		setDataVector(data, columnNames);
 	}

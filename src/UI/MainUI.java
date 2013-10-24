@@ -4,9 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -27,7 +30,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
-
+import javax.swing.KeyStroke;
 
 import user.User;
 import util.Configuration;
@@ -69,7 +72,7 @@ public class MainUI extends JFrame implements Observer{
 	/**
 	 *登录面板
 	 */
-	private LoginPanel loginPanel = new LoginPanel(currentUser);
+	private LoginPanel loginPanel = null;
 	
 	/**
 	 * 注册面板
@@ -96,22 +99,26 @@ public class MainUI extends JFrame implements Observer{
 	/**
 	 * 数据操作面板
 	 */
-	private TablePanel tablePanel = new TablePanel();
-	
-	private boolean isOpen = false;
-	
+	private TablePanel tablePanel = null;
 
-	
 	/** 
 	 * 创建用户界面
 	 */
 	public MainUI(){
-		
 		pathPanel = new PathInitPanel(this);
-		registerPanel = new RegisterPanel(this);
+		boolean firstStart = false;
+		if(!Configuration.isConfig()){
+			Configuration.createDefaultStorePath();
+			firstStart = true;
+		}
+			
 		
+		
+		registerPanel = new RegisterPanel(this);
+		loginPanel = new LoginPanel(currentUser);
 		//观察者设计模式
 		currentUser.addObserver(this);
+		tablePanel = new TablePanel(currentUser);
 		
 		this.setLayout(new BorderLayout());
 		add(cardPanel,BorderLayout.CENTER);
@@ -125,6 +132,10 @@ public class MainUI extends JFrame implements Observer{
 			}
 		});
 		
+		Toolkit tool= this.getToolkit();
+		Image myimage=tool.getImage(getClass().getResource("/UI/image/address.png"));
+		this.setIconImage(myimage);
+		
 		this.setSize(860,600);
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setLocation((screen.width-this.getSize().width)/2,
@@ -132,9 +143,9 @@ public class MainUI extends JFrame implements Observer{
 		this.setResizable(false);
 		this.setVisible(true);
 		cardLayout.first(cardPanel);
-		if(!Configuration.isConfig())
+		
+		if(firstStart)
 			pathPanel.showDialog();
-			
 	}
 	
 	/** 
@@ -169,7 +180,7 @@ public class MainUI extends JFrame implements Observer{
 	 */
 	public void enter(MouseEvent e){
 		if(e.getClickCount() == 2)
-			cardLayout.show(cardPanel, "table");
+			showTable();
 	}
 	
 	
@@ -183,17 +194,6 @@ public class MainUI extends JFrame implements Observer{
 	}
 	
 	
-	
-	/**
-	 *  打开文件
-	 */
-	public void openFile() {
-		if(tablePanel.importFile()){
-			showTable();
-			isOpen = true;
-		}
-		
-	}
 
 	/** 
 	 * 显示主题
@@ -228,7 +228,10 @@ public class MainUI extends JFrame implements Observer{
 			nowLocation = "registerPanel";
 		}
 	}
-		
+	
+	/**
+	 * 回退
+	 */
 	public void showBack() {
 		if(!backStack.empty()){
 			aheadStack.push(backStack.peek());
@@ -236,6 +239,9 @@ public class MainUI extends JFrame implements Observer{
 		}
 	}
 	
+	/**
+	 * 显示前一页
+	 */
 	public void showAhead() {
 		if(!aheadStack.empty()){
 			backStack.push(aheadStack.peek());
@@ -254,24 +260,22 @@ public class MainUI extends JFrame implements Observer{
 		helpMenu = new JMenu("帮助");
 		
 		JMenuItem newItem = new JMenuItem("新建");
-		JMenuItem saveItem = new JMenuItem("保存");
-		JMenuItem openItem = new JMenuItem("导入");
-		JMenuItem exportItem = new JMenuItem("导出excel");
-		JMenuItem sortItem = new JMenuItem("排序");
+		newItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,InputEvent.CTRL_MASK));
 		JMenuItem chooseItem = new JMenuItem("更改储存路径");
+		chooseItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M,InputEvent.CTRL_MASK));
 		
 		loginItem = new JMenuItem("用户登陆");
+		loginItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_L,InputEvent.CTRL_MASK));
 		registerItem = new JMenuItem("账户注册");
+		registerItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,InputEvent.CTRL_MASK));
 		changePassWordItem = new JMenuItem("修改密码");
+		changePassWordItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H,InputEvent.CTRL_MASK));
 		logoutItem = new JMenuItem("安全退出");
+		logoutItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,InputEvent.CTRL_MASK));
 		
-		JMenuItem declareItem = new JMenuItem("使用说明");
+		JMenuItem declareItem = new JMenuItem("版本：1.0");
 		
 		fileMenu.add(newItem);
-		fileMenu.add(saveItem);
-		fileMenu.add(openItem);
-		fileMenu.add(exportItem);
-		fileMenu.add(sortItem);
 		fileMenu.add(chooseItem);
 		
 		userMenu.add(loginItem);
@@ -295,13 +299,6 @@ public class MainUI extends JFrame implements Observer{
 		loginItem.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
 				loginPanel.showLoginDiglog();
-			}
-		});
-		
-		sortItem.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {
-				if(isOpen)
-					tablePanel.sort();
 			}
 		});
 		
@@ -337,26 +334,7 @@ public class MainUI extends JFrame implements Observer{
 				loginItem.setEnabled(true);
 			}
 		});
-		
-		saveItem.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				tablePanel.saveFile();
-			}
-		});
-		
-		openItem.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent arg0) {
-				openFile();
-			}	
-		});
-		
-		exportItem.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent arg0) {
-				tablePanel.exportExcel();
-			}
-				
-		});
-		
+
 		menu.add(fileMenu);
 		menu.add(userMenu);
 		menu.add(helpMenu);
@@ -367,38 +345,39 @@ public class MainUI extends JFrame implements Observer{
 		JButton jbtBack = new JButton(new ImageIcon(
 				getClass().getResource("/UI/image/arrow_left.png")));
 		setButton(jbtBack);
+		jbtBack.setMnemonic(KeyEvent.VK_B);
 		
 		JButton jbtAhead = new JButton(new ImageIcon(
 				getClass().getResource("/UI/image/arrow_right.png")));
 		setButton(jbtAhead);
+		jbtAhead.setMnemonic(KeyEvent.VK_P);
 		
 		JButton jbtHome = new JButton("首页", new ImageIcon(
 				getClass().getResource("/UI/image/home.png")));
 		setButton(jbtHome);
+		jbtHome.setMnemonic(KeyEvent.VK_H);
 		
 		JButton jbtFile = new JButton("新建", new ImageIcon(
 				getClass().getResource("/UI/image/add.png")));
 		setButton(jbtFile);
-		
-		JButton jbtSave = new JButton("保存", new ImageIcon(
-				getClass().getResource("/UI/image/save_as.png")));
-		setButton(jbtSave);
-		
-		JButton jbtAddress = new JButton("电话本",new ImageIcon(
+		jbtFile.setMnemonic(KeyEvent.VK_N);
+
+		JButton jbtTable = new JButton("电话本",new ImageIcon(
 				getClass().getResource("/UI/image/address.png")));
-		setButton(jbtAddress);
+		setButton(jbtTable);
+		jbtTable.setMnemonic(KeyEvent.VK_T);
 		
-		JButton jbtGround = new JButton("用户",new ImageIcon(
+		JButton jbtUser = new JButton("登录",new ImageIcon(
 				getClass().getResource("/UI/image/user.png")));
-		setButton(jbtGround);
+		setButton(jbtUser);
+		jbtUser.setMnemonic(KeyEvent.VK_L);
 		
-		JButton jbtSafe = new JButton("安全",new ImageIcon(
-				getClass().getResource("/UI/image/safe.png")));
-		setButton(jbtSafe);
-		
-		JButton jbtSetUp = new JButton("设置",new ImageIcon(
-				getClass().getResource("/UI/image/setup.png")));
-		setButton(jbtSetUp);
+		jbtFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(tablePanel.newFileDir())
+					showTable() ;
+			}	
+		});
 		
 		jbtBack.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
@@ -418,23 +397,25 @@ public class MainUI extends JFrame implements Observer{
 			}
 		});
 
-		jbtSave.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent arg0) {
-				tablePanel.saveFile();
+		jbtTable.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {		
+				showTable();
 			}
 		});
-
+		
+		jbtUser.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				loginPanel.showLoginDiglog();
+			}
+		});
 
 		tool.setFloatable(true);
 		tool.add(jbtBack);
 		tool.add(jbtAhead);
 		tool.add(jbtHome);
 		tool.add(jbtFile);
-		tool.add(jbtSave);
-		tool.add(jbtAddress);
-		tool.add(jbtGround);
-		tool.add(jbtSafe);
-		tool.add(jbtSetUp);
+		tool.add(jbtTable);
+		tool.add(jbtUser);
 		
 		add(tool,BorderLayout.NORTH);
 		
@@ -454,7 +435,6 @@ public class MainUI extends JFrame implements Observer{
 	 */
 	public void setButton(JButton e){
 		e.setBorderPainted(false);
-		//e.setContentAreaFilled(false);
 		e.setCursor(new Cursor(Cursor.HAND_CURSOR));
 	}
 	

@@ -75,7 +75,7 @@ public class FileProxy {
 	}
 	
 	/** 
-	 * 将linkMans写到指定文件 
+	 * 将linkMans写到指定.xls文件 
 	 * 
 	 */
 	public static void exportExcel(List<LinkMan> linkMans){
@@ -91,7 +91,6 @@ public class FileProxy {
 			    writer = new FileWriter(file);
 			    for(int i=0; i<linkMans.size(); i++){
 			    	for(Object eachItem: linkMans.get(i).toArray()){
-			    		System.out.println((String)eachItem);
 			    		writer.write((String)eachItem + '\t');
 			    	}
 			    	writer.write('\n');
@@ -102,7 +101,7 @@ public class FileProxy {
 			    try {
 					writer.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
+					JOptionPane.showMessageDialog(null, "写入文件错误", "提醒", JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		}

@@ -6,11 +6,10 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -48,41 +47,52 @@ public class RegisterPanel extends JPanel{
 		
 		this.setLayout(null);
 		
+		JLabel labTitle = new JLabel("-- 修改密码 --"); 
+		this.add(labTitle);
+		labTitle.setFont(font);
+		labTitle.setBounds(40, 60, 250, 60);
+		
 		JLabel labName = new JLabel("用户名: "); 
 		this.add(labName);
 		labName.setFont(font);
-		labName.setBounds(40, 60, 100, 40);
+		labName.setBounds(40, 160, 100, 40);
 		
 		textName = new JTextField(20);
 		this.add(textName);
 		textName.setFont(font);
-		textName.setBounds(140, 60, 300, 40);
+		textName.setBounds(140, 160, 300, 40);
 		
 		labPassWordFirst = new JLabel("密码: "); 
 		this.add(labPassWordFirst);
 		labPassWordFirst.setFont(font);
-		labPassWordFirst.setBounds(40, 130, 100, 40);
+		labPassWordFirst.setBounds(40, 230, 100, 40);
 		
 		textPassWordFirst = new JPasswordField(20);
 		this.add(textPassWordFirst);
-		textPassWordFirst.setBounds(140, 130, 300, 40);
+		textPassWordFirst.setBounds(140, 230, 300, 40);
 		
 		labPassWordSecond = new JLabel("密码确认: "); 
 		this.add(labPassWordSecond);
 		labPassWordSecond.setFont(new java.awt.Font("宋体", 0, 20));
-		labPassWordSecond.setBounds(40, 200, 100, 40);
+		labPassWordSecond.setBounds(40, 300, 100, 40);
 		
 		textPassWordSecond = new JPasswordField(20);
 		this.add(textPassWordSecond);
-		textPassWordSecond.setBounds(140, 200, 300, 40);
+		textPassWordSecond.setBounds(140, 300, 300, 40);
 		
-		JButton btnSure = new JButton("确认");
+		JButton btnSure = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/sure.png")));
 		this.add(btnSure);
-		btnSure.setBounds(140, 270, 90, 40);
+		btnSure.setBorderPainted(false);
+		btnSure.setContentAreaFilled(false);
+		btnSure.setBounds(100, 370, 150, 40);
 		
-		JButton btnCancel = new JButton("取消");
+		JButton btnCancel = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/goBack.png")));
+		btnCancel.setBorderPainted(false);
+		btnCancel.setContentAreaFilled(false);
 		this.add(btnCancel);
-		btnCancel.setBounds(270, 270, 90, 40);
+		btnCancel.setBounds(270, 370, 150, 40);
 		
 		btnSure.addActionListener(new ActionListener(){
 			@SuppressWarnings("deprecation")
@@ -193,7 +203,7 @@ public class RegisterPanel extends JPanel{
 		int height = getHeight();
 		Image img = null;
 		try {
-			img = ImageIO.read(new File(getClass().getResource("/UI/image/register.jpg").toURI()));
+			img = ImageIO.read(getClass().getResource("/UI/image/register.jpg"));
 		} catch (Exception e) {
 			
 		}    

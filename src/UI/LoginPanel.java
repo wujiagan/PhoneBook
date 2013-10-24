@@ -72,19 +72,22 @@ public class LoginPanel extends JFrame{
 		cont.add(textPassword);
 		textPassword.setBounds(120, 130, 300, 40);
 		
-		JButton btnLogin = new JButton("确定");
+		JButton btnLogin = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/sure.png")));
 		cont.add(btnLogin);
 		btnLogin.setBorderPainted(false);
 		btnLogin.setContentAreaFilled(false);
 		btnLogin.setBounds(120, 200, 120, 60);
 		
-		JButton btnCancel = new JButton("退出");
+		JButton btnCancel = new JButton(new ImageIcon(
+				getClass().getResource("/UI/image/goBack.png")));
 		btnCancel.setBorderPainted(false);
 		btnCancel.setContentAreaFilled(false);
 		cont.add(btnCancel);
 		btnCancel.setBounds(270, 200, 120, 60);
 		
 		btnLogin.addActionListener(new ActionListener(){
+			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent e) {
 				if(loginProxy.userLogin(current_user, textName.getText(), textPassword.getText()))
 					closeLoginDiglog();

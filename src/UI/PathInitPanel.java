@@ -29,8 +29,9 @@ public class PathInitPanel extends JFrame{
 	 */
 	private static final long serialVersionUID = 1L;
 	private static File[] roots = File.listRoots();
-	private JTextField pathText ;
 	private static String path = roots[0] + "phoneBook";
+	private JTextField pathText ;
+	
 	private Font font = new Font("宋体", 0, 20);
 	
 	public PathInitPanel(JFrame parent){
@@ -74,7 +75,7 @@ public class PathInitPanel extends JFrame{
 		});
 		
 		JButton btnSure = new JButton(new ImageIcon(
-				getClass().getResource("/UI/image/submit.png")));
+				getClass().getResource("/UI/image/sure.png")));
 		cont.add(btnSure);
 		btnSure.setBorderPainted(false);
 		btnSure.setContentAreaFilled(false);
@@ -101,7 +102,6 @@ public class PathInitPanel extends JFrame{
 		btnCancel.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				closeDialog();
 			}
 		});

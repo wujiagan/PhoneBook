@@ -17,7 +17,6 @@ public class HomePanel extends JPanel{
 		ImageIcon image = new ImageIcon(theme);
 		image.setImage(image.getImage().getScaledInstance(854, 505, Image.SCALE_DEFAULT));
 		add(new JLabel(image));
-		
 	}
 	
 }

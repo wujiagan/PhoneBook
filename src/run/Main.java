@@ -1,6 +1,7 @@
 package run;
 
 import javax.swing.UIManager;
+
 import UI.MainUI;
 
 public class Main {

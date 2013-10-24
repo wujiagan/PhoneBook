@@ -6,7 +6,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -98,32 +97,32 @@ public class ProfilePanel extends JPanel{
 		groundBox.setBounds(150, 300, 300, 40);
 		
 		btnPre = new JButton(new ImageIcon(
-				getClass().getResource("/UI/image/profile_pre.png")));
+				getClass().getResource("/UI/image/pre.png")));
 		this.add(btnPre);
 		btnPre.setBorderPainted(false);
 		btnPre.setContentAreaFilled(false);
-		btnPre.setBounds(30, 360, 100, 40);
+		btnPre.setBounds(10, 360, 150, 40);
 		
 		btnAlter = new JButton(new ImageIcon(
-				getClass().getResource("/UI/image/profile_save.png")));
+				getClass().getResource("/UI/image/savebtn.png")));
 		this.add(btnAlter);
 		btnAlter.setBorderPainted(false);
 		btnAlter.setContentAreaFilled(false);
-		btnAlter.setBounds(130, 360, 100, 40);
+		btnAlter.setBounds(160, 360, 150, 40);
 		
 		btnBack = new JButton(new ImageIcon(
-				getClass().getResource("/UI/image/profile_comeback.png")));
+				getClass().getResource("/UI/image/goBack.png")));
 		this.add(btnBack);
 		btnBack.setBorderPainted(false);
 		btnBack.setContentAreaFilled(false);
-		btnBack.setBounds(230, 360, 100, 40);
+		btnBack.setBounds(310, 360, 150, 40);
 		
 		btnNext = new JButton(new ImageIcon(
-				getClass().getResource("/UI/image/profile_next.png")));
+				getClass().getResource("/UI/image/next.png")));
 		this.add(btnNext);
 		btnNext.setBorderPainted(false);
 		btnNext.setContentAreaFilled(false);
-		btnNext.setBounds(330, 360, 100, 40);
+		btnNext.setBounds(460, 360, 150, 40);
 		
 		btnPre.addActionListener(new ActionListener(){
 			@Override
@@ -207,6 +206,16 @@ public class ProfilePanel extends JPanel{
 	}
 	
 	/**
+	 * 显示list中第index个数据
+	 * @param list
+	 * @param index
+	 */
+	public void showByBufferMap(List<LinkMan>list, int index){
+		updateProfile(list.get(index));
+	}
+	
+	
+	/**
 	 * 更新profilePanel中的数据列表，和当前选择
 	 * @param listMans
 	 * @param select
@@ -220,16 +229,24 @@ public class ProfilePanel extends JPanel{
 	 * 显示上一条数据
 	 */
 	public void preProfile(){
+		if(listMans == null)
+			return ;
 		int len = listMans.size();
 		currenProfile = (currenProfile + len -1) % len;
-		updateProfile(listMans.get(currenProfile));	
+		if(currenProfile>=0 && currenProfile<listMans.size())
+			updateProfile(listMans.get(currenProfile));	
 	}
+	
 	
 	/**
 	 * 显示下一条数据
 	 */
 	public void nextProfile(){
-		updateProfile(listMans.get((++currenProfile)%listMans.size()));	
+		if(listMans == null)
+			return ;
+		int index = (++currenProfile)%listMans.size();
+		if(index>=0 && index<listMans.size())
+			updateProfile(listMans.get(index));	
 	}
 	
 	/**
@@ -242,7 +259,7 @@ public class ProfilePanel extends JPanel{
 		int width = getWidth();
 		int height = getHeight();
 		try {
-			img = ImageIO.read(new File(getClass().getResource("/UI/image/profile.jpg").toURI()));
+			img = ImageIO.read(getClass().getResource("/UI/image/profile.jpg"));
 		} catch (Exception e) {
 			
 		}    

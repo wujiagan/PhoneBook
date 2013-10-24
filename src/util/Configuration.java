@@ -90,8 +90,14 @@ public class Configuration {
 		return null;
 	}
 	
-	public static void main(String args[]){
-		Configuration.getStorePath();
+	/**
+	 * 创建默认储存路径
+	 */
+	public static boolean createDefaultStorePath() {
+		File[] roots = File.listRoots();
+		String path = roots[0] + "phoneBook";
+		createConfigFile(path);
+		return true;
 	}
 	
 }

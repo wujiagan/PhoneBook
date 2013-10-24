@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -69,7 +71,7 @@ public class XMLFileProxy {
 	 * @param fileName
 	 */
 	@SuppressWarnings("unchecked")
-	public static void load(List<LinkMan> linkMans, String fileName) {
+	public static void load(List<LinkMan> linkMans, String fileName, boolean currenFileClock) {
 		File file = new File(fileName);
 		if(!file.exists()){
 			linkMans.clear();
@@ -83,6 +85,23 @@ public class XMLFileProxy {
 		}
 		
 		Element linkManList = doc.getRootElement();
+		if(linkManList.attributeValue("pass")!=null)
+		{
+			currenFileClock = true;
+			String pass = JOptionPane.showInputDialog(null,
+					"请输入密码" ,
+					"打开加密文件",JOptionPane.QUESTION_MESSAGE
+					);
+			if(pass == null)
+				return;
+			if(!pass.equals(linkManList.attributeValue("pass"))){
+				JOptionPane.showMessageDialog(null, "密码错误", "错误提示", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			
+		}
+		else
+			currenFileClock = false;
 		
 		Iterator<Element> iter = linkManList.elementIterator();
 		
@@ -101,9 +120,12 @@ public class XMLFileProxy {
 	 * @param linkMans
 	 * @param fileName
 	 */
-	public static void saveToFile(List<LinkMan> linkMans, String fileName) {
+	@SuppressWarnings("deprecation")
+	public static void saveToFile(List<LinkMan> linkMans, String fileName, boolean isLock, String key) {
 		Document doc = DocumentHelper.createDocument();;
 		Element linkManList = doc.addElement("linkManList");
+		if(isLock)
+			linkManList.setAttributeValue("pass", key);
 		
 		Iterator<LinkMan> iterator = linkMans.iterator();
 		

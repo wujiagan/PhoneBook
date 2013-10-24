@@ -7,7 +7,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -19,9 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import user.LinkMan;
-import util.Configuration;
-import util.FileProxy;
-import util.XMLFileProxy;
 
 public final class LinkManAddPanel extends JPanel{
 	
@@ -101,18 +97,18 @@ public final class LinkManAddPanel extends JPanel{
 
 		
 		btnSave = new JButton(new ImageIcon(
-				getClass().getResource("/UI/image/profile_save.png")));
+				getClass().getResource("/UI/image/savebtn.png")));
 		this.add(btnSave);
 		btnSave.setBorderPainted(false);
 		btnSave.setContentAreaFilled(false);
-		btnSave.setBounds(130, 360, 100, 40);
+		btnSave.setBounds(70, 360, 150, 40);
 		
 		btnBack = new JButton(new ImageIcon(
-				getClass().getResource("/UI/image/profile_comeback.png")));
+				getClass().getResource("/UI/image/goBack.png")));
 		this.add(btnBack);
 		btnBack.setBorderPainted(false);
 		btnBack.setContentAreaFilled(false);
-		btnBack.setBounds(230, 360, 100, 40);
+		btnBack.setBounds(230, 360, 150, 40);
 		
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -177,7 +173,7 @@ public final class LinkManAddPanel extends JPanel{
 		int width = getWidth();
 		int height = getHeight();
 		try {
-			img = ImageIO.read(new File(getClass().getResource("/UI/image/profile.jpg").toURI()));
+			img = ImageIO.read(getClass().getResource("/UI/image/addLinkManPanel.png"));
 		} catch (Exception e) {
 			
 		}    
