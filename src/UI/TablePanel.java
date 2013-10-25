@@ -145,7 +145,8 @@ public class TablePanel extends JPanel {
 					if(!bufferMap.isEmpty()){
 						Set<LinkMan> set = bufferMap.keySet();
 						List<LinkMan> list = new LinkedList<LinkMan>(set);
-						profilePanel.showByBufferMap(list, selectRow);
+						profilePanel.showByBufferMap(linkMans, bufferMap.get(list.get(selectRow)));
+						bufferMap.clear();
 					}
 					else
 						profilePanel.updateProfilePanel(linkMans, selectRow);
@@ -195,7 +196,10 @@ public class TablePanel extends JPanel {
 				String key = keyText.getText();
 				if(!key.equals("")){
 					DataOperate.find(linkMans, key, bufferMap);
-					updateTable(bufferMap);
+					if(bufferMap.size() == 0)
+						JOptionPane.showMessageDialog(null, "没有相关记录", "提示", JOptionPane.PLAIN_MESSAGE);	
+					else
+						updateTable(bufferMap);
 					closeFindPanel();
 				}
 				else
@@ -271,6 +275,7 @@ public class TablePanel extends JPanel {
 		
 		JButton btnSave = new JButton(new ImageIcon(
 				getClass().getResource("/UI/image/save_as.png")));
+		btnSave.setMnemonic(KeyEvent.VK_S);
 		tool.add(btnSave);
 		
 		btnSave.addActionListener(new ActionListener(){
@@ -347,6 +352,7 @@ public class TablePanel extends JPanel {
 	 * 添加新联系人到指定文件下
 	 */
 	public void addLinkMan(String dirName, String fileName) {
+		
 		openXMLFile(dirName, fileName);	//更新后台数据
 		showLinkManAddPanel();
 	}
@@ -502,8 +508,12 @@ public class TablePanel extends JPanel {
 	 * @param fileName
 	 */
 	public void openXMLFile(String dirPath, String fileName) {
-		if(currenFilePath.equals(Configuration.getStorePath() + dirPath + File.separator + fileName))
-				return ;
+		
+		if(currenFilePath.equals(Configuration.getStorePath() + dirPath + File.separator + fileName)){
+			updateTable();
+			return ;
+		}
+		saveFile();
 		currenFilePath = Configuration.getStorePath() + dirPath + File.separator + fileName;
 		XMLFileProxy.load(linkMans, currenFilePath, currentFileClock);
 		updateTable();

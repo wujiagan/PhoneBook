@@ -44,6 +44,7 @@ public class MainUI extends JFrame implements Observer{
 	 */
 	private static final long serialVersionUID = 7489067892021806972L;
 	
+	
 	/**
 	 * 菜单栏
 	 */
@@ -131,6 +132,7 @@ public class MainUI extends JFrame implements Observer{
 				System.exit(1);
 			}
 		});
+		
 		
 		Toolkit tool= this.getToolkit();
 		Image myimage=tool.getImage(getClass().getResource("/UI/image/address.png"));

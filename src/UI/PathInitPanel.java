@@ -28,8 +28,8 @@ public class PathInitPanel extends JFrame{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static File[] roots = File.listRoots();
-	private static String path = roots[0] + "phoneBook";
+	private static File[] rootFile = File.listRoots();
+	private static String path = rootFile[0] + "phoneBook";
 	private JTextField pathText ;
 	
 	private Font font = new Font("宋体", 0, 20);

@@ -94,9 +94,10 @@ public class Configuration {
 	 * 创建默认储存路径
 	 */
 	public static boolean createDefaultStorePath() {
-		File[] roots = File.listRoots();
-		String path = roots[0] + "phoneBook";
+		File[] rootFile = File.listRoots();
+		String path = rootFile[0] + "phoneBook";
 		createConfigFile(path);
+		FileProxy.createDir(path);
 		return true;
 	}
 	

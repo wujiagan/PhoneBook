@@ -158,6 +158,7 @@ public class ProfilePanel extends JPanel{
 	 * 返回table界面
 	 */
 	public void goBack(){
+		this.parent.updateTable();
 		this.parent.showTable();
 	}
 	

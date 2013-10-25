@@ -47,10 +47,6 @@ public class RegisterPanel extends JPanel{
 		
 		this.setLayout(null);
 		
-		JLabel labTitle = new JLabel("-- 修改密码 --"); 
-		this.add(labTitle);
-		labTitle.setFont(font);
-		labTitle.setBounds(40, 60, 250, 60);
 		
 		JLabel labName = new JLabel("用户名: "); 
 		this.add(labName);
